@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PapaVoice 爸爸的声音胎教</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" aria-label="PapaVoice pregnancy companion app">
+      <section class="hero card">
+        <p class="eyebrow">👶 孕期胎教 · 爸爸声音陪伴 · 四国语言</p>
+        <div class="brand-row">
+          <div class="logo" aria-hidden="true">PV</div>
+          <div>
+            <h1>PapaVoice</h1>
+            <p class="subtitle">爸爸的声音胎教</p>
+          </div>
+        </div>
+        <p class="intro">每天 3 分钟，把爱说给宝宝听。录入爸爸声音、选择中文/英文/意大利语/法语，生成适合孕期陪伴的温柔胎教内容。</p>
+      </section>
+
+      <section class="today card" aria-labelledby="today-title">
+        <div>
+          <p class="section-label">今日胎教</p>
+          <h2 id="today-title">孕周未设置</h2>
+        </div>
+        <button class="ghost-button" type="button">本地保存</button>
+      </section>
+
+      <section class="stats" aria-label="Usage statistics">
+        <article class="stat card">
+          <strong>0</strong>
+          <span>记录天数</span>
+        </article>
+        <article class="stat card">
+          <strong>0</strong>
+          <span>播放次数</span>
+        </article>
+        <article class="stat card">
+          <strong>4</strong>
+          <span>支持语言</span>
+        </article>
+      </section>
+
+      <section class="quick-actions card" aria-label="Quick actions">
+        <button class="primary-button" type="button">开始播放</button>
+        <button class="secondary-button" type="button">录爸爸声音</button>
+      </section>
+
+      <section class="settings card" aria-labelledby="settings-title">
+        <div class="section-header">
+          <p class="section-label">基础设置</p>
+          <span>本地保存</span>
+        </div>
+        <h2 id="settings-title">给宝宝的每日声音计划</h2>
+        <form>
+          <label>
+            宝宝昵称
+            <input type="text" placeholder="例如：小星星" />
+          </label>
+          <label>
+            孕周
+            <input type="number" min="1" max="42" placeholder="例如：24" />
+          </label>
+          <label>
+            爸爸称呼
+            <input type="text" placeholder="例如：爸爸 / Papa" />
+          </label>
+          <label>
+            每日提醒时间
+            <input type="time" value="20:30" />
+          </label>
+          <label class="full-width">
+            爸爸今天想说的话
+            <textarea rows="4" placeholder="宝宝，今天爸爸想告诉你……"></textarea>
+          </label>
+          <div class="form-actions full-width">
+            <button class="primary-button" type="button">保存设置</button>
+            <button class="secondary-button" type="button">开启提醒</button>
+          </div>
+        </form>
+      </section>
+
+      <nav class="tabbar" aria-label="Primary navigation">
+        <a class="active" href="#">首页</a>
+        <a href="#">录音</a>
+        <a href="#">播放</a>
+        <a href="#">计划</a>
+      </nav>
+    </main>
+  </body>
+</html>

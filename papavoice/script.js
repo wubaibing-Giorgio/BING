@@ -120,7 +120,7 @@ const translations = {
         'nav-stats': '통계',
         'nav-settings': '설정',
         'prenatal-content-1': '사랑하는 아기, 아빠예요. 오늘 날씨가 정말 좋네. 함께 햇빛을 즐겨요.',
-        'prenatal-content-2': '아기, 엄마가 당신과 이야기를 나누고 싶어요. 옛날옛적에 작은 토끼가 있었어요...',
+        'prenatal-content-2': '아기, 엄마가 당신과 이야기를 공유하고 싶어요. 옛날옛적에 작은 토끼가 있었어요...',
         'prenatal-content-3': '사랑하는 아기, 아름다운 음악을 듣고 마음과 몸을 편하게 하자.',
         'prenatal-content-4': '사랑하는 아기, 오늘 우리 함께 새로운 단어를 배워요.'
     }
@@ -375,7 +375,6 @@ function playRecording(recordingId) {
     const recording = recordings.find(r => r.id === recordingId);
     
     if (recording) {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const audio = new Audio();
         audio.src = recording.data;
         audio.play();

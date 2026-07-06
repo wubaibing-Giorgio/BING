@@ -1,0 +1,29 @@
+{
+  "name": "PapaVoice 爸爸的声音胎教",
+  "short_name": "PapaVoice",
+  "description": "录入爸爸声音样本，播放中文、English、Italiano、Français 四国语音胎教内容。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#f08a80",
+  "background_color": "#fff7f1",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect rx='42' width='192' height='192' fill='%23f08a80'/%3E%3Ctext x='96' y='122' font-size='62' font-weight='800' fill='white' text-anchor='middle' font-family='Arial'%3EPV%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect rx='110' width='512' height='512' fill='%23f08a80'/%3E%3Ctext x='256' y='325' font-size='168' font-weight='800' fill='white' text-anchor='middle' font-family='Arial'%3EPV%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "录入爸爸声音", "short_name": "录音", "url": "./?tab=record" },
+    { "name": "播放四国语音", "short_name": "播放", "url": "./?tab=play" }
+  ]
+}

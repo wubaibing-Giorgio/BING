@@ -1,6 +1,4 @@
 // AI Voice Cloning Handler
-// Handles communication with Vercel backend API
-
 const AI_VOICE_CONFIG = {
     apiBaseUrl: '/api',
     languages: {
@@ -8,8 +6,7 @@ const AI_VOICE_CONFIG = {
         'en': { name: 'English', flag: '🇺🇸', code: 'en-US' },
         'it': { name: 'Italiano', flag: '🇮🇹', code: 'it-IT' },
         'fr': { name: 'Français', flag: '🇫🇷', code: 'fr-FR' }
-    },
-    recordingDuration: { min: 30, max: 60 }
+    }
 };
 
 let recordingBlob = null;
@@ -30,20 +27,18 @@ async function checkAPIStatus() {
     try {
         const response = await fetch(`${AI_VOICE_CONFIG.apiBaseUrl}/create-voice`, {
             method: 'HEAD'
-        });
+        }).catch(() => null);
         
         const statusBox = document.getElementById('api-status-box');
         const statusText = document.getElementById('api-status-text');
         
-        if (!response.ok && response.status !== 404) {
+        if (!response || response.status === 503) {
             statusBox.style.display = 'block';
             statusBox.className = 'warning-box';
-            statusText.textContent = '⚠️ 当前未配置 AI 语音服务，无法进行真实声纹克隆。请配置 ELEVENLABS_API_KEY 环境变量。';
-        } else {
-            statusBox.style.display = 'none';
+            statusText.textContent = '⚠️ AI voice service not configured. Please set ELEVENLABS_API_KEY.';
         }
     } catch (error) {
-        console.log('API status check:', error);
+        console.log('API status check - service may not be configured');
     }
 }
 
@@ -133,8 +128,6 @@ function displayRecordingPreview() {
         const audioUrl = URL.createObjectURL(recordingBlob);
         audioElement.src = audioUrl;
         previewDiv.style.display = 'block';
-        
-        // Show step 2
         showStep(2);
     }
 }
@@ -149,16 +142,14 @@ async function uploadVoiceClone() {
     try {
         const btn = document.getElementById('btn-upload-voice');
         btn.disabled = true;
-        btn.innerHTML = '<span class="loading"></span> Uploading...';
+        btn.textContent = '⏳ Uploading...';
         
-        const formData = new FormData();
-        formData.append('audioData', recordingBlob);
-        formData.append('voiceName', 'PapaVoice Clone');
+        const audioBase64 = await blobToBase64(recordingBlob);
         
         const response = await fetch(`${AI_VOICE_CONFIG.apiBaseUrl}/create-voice`, {
             method: 'POST',
             body: JSON.stringify({
-                audioData: await blobToBase64(recordingBlob),
+                audioData: audioBase64,
                 voiceName: 'PapaVoice Clone'
             }),
             headers: {
@@ -170,12 +161,10 @@ async function uploadVoiceClone() {
         
         if (response.ok && data.voiceId) {
             voiceId = data.voiceId;
-            showSuccess('✅ Voice clone created successfully!\n Your voice ID: ' + voiceId.substring(0, 8) + '...');
             document.getElementById('upload-status').innerHTML = `<div class="success-box">✅ Voice clone created! ID: ${voiceId.substring(0, 8)}...</div>`;
             showStep(3);
         } else if (data.fallback) {
-            showWarning('⚠️ ' + data.message);
-            // Allow fallback to browser speech synthesis
+            document.getElementById('upload-status').innerHTML = `<div class="warning-box">⚠️ ${data.message}</div>`;
         } else {
             showError('Failed to create voice clone: ' + (data.error || 'Unknown error'));
         }
@@ -206,6 +195,7 @@ async function generateMultilingualAudio() {
     try {
         const btn = document.getElementById('btn-generate-audio');
         btn.disabled = true;
+        btn.textContent = '⏳ Generating...';
         
         const resultsDiv = document.getElementById('audio-results');
         resultsDiv.innerHTML = '<div class="info-box">⏳ Generating audio in 4 languages...</div>';
@@ -233,9 +223,6 @@ async function generateMultilingualAudio() {
                 if (response.ok && data.audio) {
                     audioResults[lang] = data.audio;
                     successCount++;
-                } else if (data.fallback) {
-                    // Use browser speech synthesis as fallback
-                    console.log('Using fallback for:', lang);
                 }
             } catch (error) {
                 console.error(`Error generating ${lang} audio:`, error);
@@ -244,9 +231,8 @@ async function generateMultilingualAudio() {
         
         if (successCount > 0) {
             displayAudioResults(audioResults, message);
-            showSuccess('✅ Audio generated successfully!');
         } else {
-            showWarning('Could not generate audio. Please check your configuration.');
+            resultsDiv.innerHTML = '<div class="warning-box">⚠️ Could not generate audio. Please check your configuration.</div>';
         }
     } catch (error) {
         console.error('Generation error:', error);
@@ -254,21 +240,23 @@ async function generateMultilingualAudio() {
     } finally {
         const btn = document.getElementById('btn-generate-audio');
         btn.disabled = false;
+        btn.innerHTML = '<span>🌍</span><span>Generate Multilingual Audio</span>';
     }
 }
 
 // Display audio results
 function displayAudioResults(audioResults, message) {
     const resultsDiv = document.getElementById('audio-results');
-    resultsDiv.innerHTML = '';
+    resultsDiv.innerHTML = '<div class="success-box">✅ Audio generated successfully!</div>';
     
     for (const [lang, audioData] of Object.entries(audioResults)) {
         const langInfo = AI_VOICE_CONFIG.languages[lang];
         const playerDiv = document.createElement('div');
         playerDiv.className = 'audio-player';
+        const audioId = 'audio-' + lang;
         playerDiv.innerHTML = `
             <div class="audio-language">${langInfo.flag} ${langInfo.name}</div>
-            <audio controls style="width: 100%; margin: 10px 0;" src="${audioData}"></audio>
+            <audio id="${audioId}" controls style="width: 100%; margin: 10px 0;" src="${audioData}"></audio>
             <button class="download-btn" onclick="downloadAudio('${audioData}', '${lang}')">📥 Download ${langInfo.name}</button>
         `;
         resultsDiv.appendChild(playerDiv);
@@ -286,7 +274,6 @@ function downloadAudio(audioData, language) {
 }
 
 // Helper functions
-
 function showStep(stepNumber) {
     for (let i = 1; i <= 4; i++) {
         const section = document.getElementById(`step-${i}-section`);
@@ -311,17 +298,9 @@ function updateCharCount() {
     const input = document.getElementById('message-input');
     const count = document.getElementById('char-count');
     count.textContent = Math.min(input.value.length, 500);
-    input.value = input.value.substring(0, 500);
-}
-
-function showSuccess(message) {
-    console.log('✅', message);
-    // Could add toast notification here
-}
-
-function showWarning(message) {
-    console.warn('⚠️', message);
-    // Could add toast notification here
+    if (input.value.length > 500) {
+        input.value = input.value.substring(0, 500);
+    }
 }
 
 function showError(message) {
@@ -337,3 +316,6 @@ function blobToBase64(blob) {
         reader.readAsDataURL(blob);
     });
 }
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', initializeAIVoice);

@@ -1,236 +1,215 @@
-# 🎙️ PapaVoice - Prenatal Education with Voice Interactions
+# PapaVoice AI - AI Voice Cloning Prenatal Education
 
-A mobile-first Progressive Web App (PWA) for prenatal education featuring voice recordings, playback, multilingual support, and offline capabilities.
+## Overview
 
-## Features
+PapaVoice AI is an upgraded version featuring **real AI voice cloning** with **4-language (中文, English, Italiano, Français) support** using ElevenLabs API for authentic voice synthesis.
 
-✅ **Voice Recording**
-- Real-time audio recording using MediaRecorder API
-- Recording duration tracking
-- Persistent storage of recordings in localStorage
+## Key Features
 
-✅ **Voice Playback**
-- Play your recorded audio
-- Play prenatal education content using Web Speech API
-- Support for multiple audio formats
+✨ **AI Voice Cloning**
+- Record dad's voice (30-60 seconds)
+- Upload to backend to create voice clone
+- AI-generated voice synthesis in 4 languages
 
-✅ **Multilingual Support**
+🌍 **Multilingual Support**
 - 🇨🇳 Chinese (中文)
 - 🇺🇸 English
-- 🇯🇵 Japanese (日本語)
-- 🇰🇷 Korean (한국어)
-- Instant language switching with full UI translation
+- 🇮🇹 Italian (Italiano)
+- 🇫🇷 French (Français)
 
-✅ **Prenatal Content**
-- Pre-written prenatal education scripts
-- Text-to-speech synthesis
-- Customizable content
+🎤 **Voice Recording**
+- Real-time audio recording
+- Recording preview
+- Audio download support
 
-✅ **Settings Management**
-- Auto-play on load toggle
-- Notification preferences
-- Dark mode support
-- Settings saved in localStorage
+📱 **Mobile-First Design**
+- Responsive PWA
+- Touch-friendly interface
+- Offline support
 
-✅ **Statistics & History**
-- Total play count tracking
-- Recording count
-- Last played timestamp and content
-- Usage statistics view
-
-✅ **PWA Capabilities**
-- Service Worker for offline support
-- App manifest for installability
-- Responsive mobile-first design
-- Install to home screen support
-
-✅ **Data Management**
-- Export data as JSON
-- Clear all data functionality
-- localStorage backup
-
-## File Structure
+## Project Structure
 
 ```
 papavoice/
-├── index.html           # Main HTML file with UI structure and styles
-├── script.js            # Core JavaScript functionality
-├── manifest.json        # PWA manifest file
-├── service-worker.js    # Service Worker for offline support
-└── README.md           # This file
+├── index.html              # Main HTML with AI voice UI
+├── script.js               # Original scripts (demo mode fallback)
+├── ai-voice-handler.js     # AI voice cloning handler
+├── manifest.json           # PWA manifest
+├── service-worker.js       # Service worker
+└── README.md              # Documentation
+
+api/
+├── create-voice.js         # Vercel Function: Create voice clone
+└── generate-audio.js       # Vercel Function: Generate multilingual audio
 ```
 
-## Getting Started
+## Setup Instructions
 
-### Installation
+### 1. Environment Configuration
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/wubaibing-Giorgio/BING.git
-   cd BING
-   ```
+Create `.env.local` in your project root:
 
-2. **Open in browser**
-   - Simply open `papavoice/index.html` in your web browser
-   - Or serve via a local HTTP server for full PWA functionality
+```bash
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+```
 
-3. **Install as PWA (Optional)**
-   - On Chrome/Edge: Click "Install" button in address bar
-   - On iOS: Use "Add to Home Screen" from Safari
-   - On Android: Click "Install app" from Chrome menu
+### 2. Install Dependencies
 
-### Usage
+```bash
+npm install
+```
 
-#### Home Tab
-- Select your preferred language (Chinese, English, Japanese, Korean)
-- View prenatal education content
-- Speak content using text-to-speech
-- Play your latest recording
+### 3. Local Development
 
-#### Record Tab
-- Click "Start Recording" to begin capturing audio
-- Recording timer shows elapsed time
-- Click "Stop Recording" to save
-- View all your recordings with timestamps
-- Play or delete recordings
+```bash
+# Run Vercel Functions locally
+vercel dev
 
-#### Statistics Tab
-- View total play count
-- See total number of recordings
-- Check last played content and timestamp
+# Or use Netlify
+netlify dev
+```
 
-#### Settings Tab
-- Toggle auto-play on load
-- Enable/disable notifications
-- Toggle dark mode
-- Export your data as JSON
-- Clear all data (warning: irreversible)
+### 4. Deploy to Vercel
 
-## Technical Details
+```bash
+# Login to Vercel
+vercel login
 
-### Technologies Used
-- **HTML5**: Semantic markup and structure
-- **CSS3**: Modern responsive design with flexbox and grid
-- **JavaScript (ES6+)**: Core functionality and state management
-- **Web APIs**:
-  - MediaRecorder API - Audio recording
-  - Web Speech API - Text-to-speech synthesis
-  - Service Worker API - Offline support
-  - localStorage API - Data persistence
-  - getUserMedia - Microphone access
+# Deploy
+vercel
 
-### Browser Compatibility
-- Chrome/Edge 80+
-- Firefox 75+
-- Safari 14+ (iOS)
-- Samsung Internet 12+
+# Deploy to production
+vercel --prod
+```
 
-### Required Permissions
-- **Microphone**: For voice recording
-- **Camera**: Not required
-- **Location**: Not required
-- **Storage**: localStorage only
+### 5. Set Environment Variables on Vercel
 
-## Data Storage
+1. Go to your Vercel project settings
+2. Navigate to Environment Variables
+3. Add: `ELEVENLABS_API_KEY` = your API key
+4. Redeploy
 
-All data is stored locally in the browser's localStorage:
-- `papavoice-recordings`: Array of recorded audio data
-- `papavoice-stats`: Usage statistics (play count, last played)
-- `papavoice-settings`: User preferences
+## Backend API Endpoints
 
-**Important**: Data is NOT synced to any server and is device-specific.
+### POST `/api/create-voice`
 
-## Offline Support
+Create or upload a voice for cloning.
 
-Once loaded, PapaVoice works offline thanks to Service Worker caching:
-- All core files are cached on first load
-- Recorded audio and data remain accessible
-- Works without internet connection
-- Sync data when back online
+**Request:**
+```json
+{
+  "audioData": "data:audio/wav;base64,...",
+  "voiceName": "PapaVoice Clone"
+}
+```
 
-## Audio Recording Details
+**Response:**
+```json
+{
+  "status": "success",
+  "voiceId": "voice_xyz123",
+  "voiceName": "PapaVoice Clone"
+}
+```
 
-### Supported Formats
-- WAV (primary)
-- MP3 (with codec support)
-- Opus (with codec support)
+### POST `/api/generate-audio`
 
-### Recording Limitations
-- Maximum recording length: Limited by device storage and browser memory
-- Audio quality: Depends on device microphone
-- Sample rate: Typically 44.1kHz or 48kHz
+Generate audio in target language using cloned voice.
 
-## Privacy & Security
+**Request:**
+```json
+{
+  "text": "亲爱的宝宝，爸爸想对你说...",
+  "language": "en",
+  "voiceId": "voice_xyz123"
+}
+```
 
-- ✅ All data stored locally
-- ✅ No server communication
-- ✅ No tracking or analytics
-- ✅ No third-party dependencies
-- ✅ No personal data collection
+**Response:**
+```json
+{
+  "status": "success",
+  "audio": "data:audio/mpeg;base64,...",
+  "language": "en",
+  "duration": 45
+}
+```
+
+## Frontend Usage
+
+### Step 1: Record Voice
+1. Click "Start" button to begin recording
+2. Speak clearly (30-60 seconds recommended)
+3. Click "Stop" to finish recording
+
+### Step 2: Upload Voice Clone
+1. Click "Upload & Create Clone"
+2. Wait for voice clone creation
+3. Your voice ID will be displayed
+
+### Step 3: Enter Message
+1. Type your message in Chinese (max 500 characters)
+2. Message will be translated to 4 languages
+
+### Step 4: Generate Audio
+1. Click "Generate Multilingual Audio"
+2. Wait for audio generation in all 4 languages
+3. Play or download each language version
+
+## Fallback Mode
+
+If `ELEVENLABS_API_KEY` is not configured:
+- AI voice cloning features show warning
+- Original demo mode with browser Speech Synthesis available
+- Users can still use prenatal education features
+
+## Technical Stack
+
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
+- **Backend:** Vercel Functions (Node.js)
+- **Voice API:** ElevenLabs API
+- **Storage:** Browser localStorage + Vercel KV (optional)
+- **PWA:** Service Worker, Web App Manifest
+
+## API Key Setup
+
+1. Sign up at [ElevenLabs](https://elevenlabs.io)
+2. Get your API key from account settings
+3. Add to environment variables (see Setup)
+
+## File Size Limits
+
+- Recording: Max 60 seconds ≈ 1-2 MB
+- API: ElevenLabs supports up to 20MB per request
+
+## Browser Support
+
+- Chrome/Edge: ✅ Full support
+- Firefox: ✅ Full support
+- Safari: ⚠️ Limited (older versions may lack MediaRecorder)
+- iOS Safari: ⚠️ Limited microphone access
 
 ## Troubleshooting
 
-### Recording Not Working
-1. Check if microphone permission is granted
-2. Try a different browser
-3. Ensure HTTPS or localhost (required for getUserMedia)
+### "Microphone permission denied"
+- Check browser permissions
+- Use HTTPS in production
+- Try a different browser
 
-### Storage Full
-- Use "Clear All" in Settings
-- Export data first if you want to backup
-- Delete individual recordings
+### "API service not configured"
+- Verify `ELEVENLABS_API_KEY` is set
+- Check Vercel environment variables
+- Restart deployment after adding key
 
-### PWA Not Installing
-1. Must be served over HTTPS or localhost
-2. Clear browser cache
-3. Check browser console for errors
-
-### Dark Mode Issues
-- Some elements may not be properly inverted
-- Use light mode as fallback
-- Report on GitHub Issues
-
-## Future Enhancements
-
-- [ ] Cloud storage sync
-- [ ] User accounts and authentication
-- [ ] Sharing recordings with others
-- [ ] Speech-to-text transcription
-- [ ] Advanced audio editing
-- [ ] Music background options
-- [ ] Timer/reminder notifications
-- [ ] Parental controls
-- [ ] Analytics dashboard
-
-## Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+### "Audio generation failed"
+- Check voice ID is valid
+- Verify message length (max 500 chars)
+- Check API rate limits
 
 ## License
 
-MIT License - Feel free to use for personal or commercial projects.
+MIT
 
 ## Support
 
-For issues, questions, or suggestions:
-- Open an issue on GitHub
-- Check existing documentation
-- Review browser console for errors
-
-## Changelog
-
-### v1.0.0 (2026-07-04)
-- Initial release
-- Voice recording and playback
-- 4-language support
-- PWA capabilities
-- Settings and statistics
-- Offline support
-
----
-
-**Made with ❤️ for prenatal education and family bonding**
+For issues or questions, please open a GitHub issue.

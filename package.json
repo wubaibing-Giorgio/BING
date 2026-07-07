@@ -1,0 +1,17 @@
+{
+  "name": "papavoice-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "mkdir -p public && cp -R papavoice public/papavoice && cp -f index.html README.md manifest.json service-worker.js styles.css script.js public/ 2>/dev/null || true",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "form-data": "^4.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

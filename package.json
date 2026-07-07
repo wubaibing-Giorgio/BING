@@ -1,0 +1,1 @@
+{"scripts":{"start":"vercel dev","check":"node --check script.js && node --check api/voice-profile.js && node --check api/generate-audio.js && node --check api/content-sources.js"},"dependencies":{"formidable":"^3.5.4"},"devDependencies":{}}

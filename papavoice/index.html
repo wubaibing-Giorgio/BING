@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#6366f1">
-    <meta name="description" content="PapaVoice - Prenatal education with voice recordings and playback">
-    <title>PapaVoice - 胎教语音互动</title>
+    <meta name="description" content="PapaVoice - AI Voice Cloning Prenatal Education">
+    <title>PapaVoice - AI智能声纹克隆胎教</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%236366f1' width='192' height='192'/><text x='96' y='140' font-size='120' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'>P</text></svg>">
     <style>
@@ -73,6 +73,51 @@
             padding-bottom: 10px;
         }
 
+        .step-indicator {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .step-box {
+            text-align: center;
+            padding: 10px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .step-box.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .step-box.completed {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .voice-clone-section {
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        .voice-clone-section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: 700;
+        }
+
         .language-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -117,12 +162,6 @@
             margin-bottom: 10px;
         }
 
-        .prenatal-content .content-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
         .control-buttons {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -158,15 +197,6 @@
         .btn-primary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #333;
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: #d1d5db;
         }
 
         .btn-danger {
@@ -217,49 +247,32 @@
             font-family: 'Courier New', monospace;
         }
 
-        .recordings-list {
-            max-height: 300px;
-            overflow-y: auto;
+        audio {
+            width: 100%;
+            margin: 10px 0;
         }
 
-        .recording-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
+        .audio-player {
+            margin-bottom: 15px;
+            padding: 15px;
             background: #f3f4f6;
             border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #e5e7eb;
         }
 
-        .recording-item-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .recording-item-name {
-            font-weight: 600;
+        .audio-language {
+            font-weight: 700;
             color: #333;
             font-size: 14px;
-            word-break: break-word;
+            margin-bottom: 10px;
         }
 
-        .recording-item-meta {
+        .download-btn {
+            background: #10b981;
+            color: white;
+            padding: 8px 12px;
             font-size: 12px;
-            color: #999;
-            margin-top: 4px;
-        }
-
-        .recording-item-controls {
-            display: flex;
-            gap: 5px;
-            margin-left: 10px;
-        }
-
-        .recording-item-controls button {
-            padding: 6px 10px;
-            font-size: 12px;
+            width: 100%;
+            margin-top: 10px;
         }
 
         .stats {
@@ -287,58 +300,84 @@
             opacity: 0.9;
         }
 
-        .settings-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        .setting-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
             padding: 12px;
-            background: #f3f4f6;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #1e40af;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #92400e;
+        }
+
+        .error-box {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #991b1b;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #065f46;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .setting-label {
             font-size: 14px;
-            color: #333;
-            font-weight: 500;
+            margin-bottom: 15px;
+            font-family: inherit;
         }
 
-        .toggle-switch {
-            width: 50px;
-            height: 28px;
-            background: #ccc;
-            border-radius: 14px;
-            cursor: pointer;
-            position: relative;
-            transition: background 0.3s ease;
-            border: none;
-            padding: 0;
+        .input-field:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .toggle-switch.active {
-            background: #6366f1;
+        .char-count {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 10px;
         }
 
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: left 0.3s ease;
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
         }
 
-        .toggle-switch.active::after {
-            left: 24px;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
         }
 
         .bottom-nav {
@@ -394,63 +433,101 @@
             display: block;
         }
 
-        .info-box {
-            background: #eff6ff;
-            border-left: 4px solid #3b82f6;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #1e40af;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e5e7eb;
-            border-radius: 2px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
         @media (max-width: 480px) {
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .container {
-                padding: 15px;
-            }
-
-            .section {
-                padding: 15px;
+            .step-indicator {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🎙️ PapaVoice</h1>
-        <p>Prenatal Education with Voice Interactions</p>
+        <h1>🎙️ PapaVoice AI</h1>
+        <p>Real AI Voice Cloning Prenatal Education</p>
     </div>
 
     <div class="container">
+        <!-- AI Voice Cloning Tab -->
+        <div id="tab-ai-voice" class="tab-content active">
+            <div class="section">
+                <h2>✨ Step-by-Step Voice Cloning</h2>
+                
+                <div class="step-indicator">
+                    <div class="step-box active" id="step-1">1️⃣ Record</div>
+                    <div class="step-box" id="step-2">2️⃣ Upload</div>
+                    <div class="step-box" id="step-3">3️⃣ Input</div>
+                    <div class="step-box" id="step-4">4️⃣ Generate</div>
+                </div>
+
+                <div id="api-status-box" class="info-box" style="display: none;">
+                    <span id="api-status-text">Loading service status...</span>
+                </div>
+
+                <!-- Step 1: Record Dad's Voice -->
+                <div class="voice-clone-section" id="step-1-section">
+                    <h3>Step 1: Record Dad's Voice (30-60 seconds)</h3>
+                    <div id="recording-indicator" class="recording-indicator" style="display: none;">
+                        <div class="recording-dot"></div>
+                        <span>Recording...</span>
+                        <span class="recording-timer" id="recording-time">00:00</span>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="btn-danger" id="btn-start-record">
+                            <span>🎤</span>
+                            <span>Start</span>
+                        </button>
+                        <button class="btn-primary" id="btn-stop-record" disabled>
+                            <span>⏹️</span>
+                            <span>Stop</span>
+                        </button>
+                    </div>
+                    <div id="recording-preview" style="display: none; margin-top: 15px;">
+                        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">✅ Recording saved:</p>
+                        <audio id="preview-audio" style="width: 100%; margin-bottom: 10px;" controls></audio>
+                    </div>
+                </div>
+
+                <!-- Step 2: Upload to Server -->
+                <div class="voice-clone-section" id="step-2-section" style="display: none;">
+                    <h3>Step 2: Upload to Create Voice Clone</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Upload your recording to create an AI voice clone.</p>
+                    <button class="btn-primary" id="btn-upload-voice" style="width: 100%;">
+                        <span>☁️</span>
+                        <span>Upload & Create Clone</span>
+                    </button>
+                    <div id="upload-status" style="margin-top: 15px;"></div>
+                </div>
+
+                <!-- Step 3: Input Text -->
+                <div class="voice-clone-section" id="step-3-section" style="display: none;">
+                    <h3>Step 3: What Do You Want to Say?</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Enter your message in Chinese (max 500 characters):</p>
+                    <textarea id="message-input" class="input-field" placeholder="亲爱的宝宝，爸爸想对你说..." style="min-height: 100px; resize: vertical;"></textarea>
+                    <div class="char-count"><span id="char-count">0</span>/500</div>
+                </div>
+
+                <!-- Step 4: Generate & Play -->
+                <div class="voice-clone-section" id="step-4-section" style="display: none;">
+                    <h3>Step 4: Generate 4-Language Audio</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Your message in 4 languages with AI voice:</p>
+                    <button class="btn-success" id="btn-generate-audio" style="width: 100%;">
+                        <span>🌍</span>
+                        <span>Generate Multilingual Audio</span>
+                    </button>
+                    <div id="audio-results" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Home Tab -->
-        <div id="tab-home" class="tab-content active">
+        <div id="tab-home" class="tab-content">
             <div class="section">
                 <h2>Choose Language</h2>
                 <div class="language-selector">
                     <button class="lang-btn active" data-lang="zh">🇨🇳 中文</button>
                     <button class="lang-btn" data-lang="en">🇺🇸 English</button>
-                    <button class="lang-btn" data-lang="ja">🇯🇵 日本語</button>
-                    <button class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
+                    <button class="lang-btn" data-lang="it">🇮🇹 Italiano</button>
+                    <button class="lang-btn" data-lang="fr">🇫🇷 Français</button>
                 </div>
             </div>
 
@@ -464,7 +541,7 @@
                 <div class="control-buttons">
                     <button class="btn-success" id="btn-speak-prenatal">
                         <span>🔊</span>
-                        <span id="speak-label">Speak Content</span>
+                        <span id="speak-label">Speak</span>
                     </button>
                     <button class="btn-primary" id="btn-play-recording">
                         <span>▶️</span>
@@ -477,37 +554,15 @@
         <!-- Record Tab -->
         <div id="tab-record" class="tab-content">
             <div class="section">
-                <h2 id="recording-title">Record Your Voice</h2>
-                <div id="recording-indicator" class="recording-indicator" style="display: none;">
-                    <div class="recording-dot"></div>
-                    <span>Recording...</span>
-                    <span class="recording-timer" id="recording-time">00:00</span>
-                </div>
-                <div class="control-buttons">
-                    <button class="btn-danger" id="btn-start-record">
-                        <span>🎤</span>
-                        <span id="start-label">Start Recording</span>
-                    </button>
-                    <button class="btn-primary" id="btn-stop-record" disabled>
-                        <span>⏹️</span>
-                        <span id="stop-label">Stop Recording</span>
-                    </button>
-                </div>
-                <div class="info-box" id="record-info">
-                    💡 Click "Start Recording" to begin recording your voice. Click "Stop Recording" when done.
-                </div>
-            </div>
-
-            <div class="section">
-                <h2 id="recordings-title">My Recordings</h2>
-                <div class="recordings-list" id="recordings-list"></div>
+                <h2>📋 My Recordings</h2>
+                <div id="recordings-list"></div>
             </div>
         </div>
 
         <!-- Statistics Tab -->
         <div id="tab-stats" class="tab-content">
             <div class="section">
-                <h2 id="stats-title">Usage Statistics</h2>
+                <h2 id="stats-title">📊 Usage Statistics</h2>
                 <div class="stats">
                     <div class="stat-card">
                         <div class="stat-value" id="stat-plays">0</div>
@@ -519,45 +574,20 @@
                     </div>
                 </div>
             </div>
-
-            <div class="section">
-                <h2 id="last-play-title">Last Played</h2>
-                <div id="last-play-info" style="font-size: 14px; color: #666;">
-                    <p id="last-play-content">No playback history yet</p>
-                </div>
-            </div>
         </div>
 
         <!-- Settings Tab -->
         <div id="tab-settings" class="tab-content">
             <div class="section">
-                <h2 id="settings-title">Settings</h2>
-                <div class="settings-grid">
-                    <div class="setting-item">
-                        <span class="setting-label" id="autoplay-label">Auto-play on load</span>
-                        <button class="toggle-switch" id="toggle-autoplay"></button>
-                    </div>
-                    <div class="setting-item">
-                        <span class="setting-label" id="notifications-label">Enable notifications</span>
-                        <button class="toggle-switch" id="toggle-notifications"></button>
-                    </div>
-                    <div class="setting-item">
-                        <span class="setting-label" id="dark-mode-label">Dark mode</span>
-                        <button class="toggle-switch" id="toggle-darkmode"></button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2 id="data-title">Data Management</h2>
+                <h2>💾 Data Management</h2>
                 <div class="control-buttons">
                     <button class="btn-primary" id="btn-export-data">
                         <span>📥</span>
-                        <span id="export-label">Export Data</span>
+                        <span id="export-label">Export</span>
                     </button>
                     <button class="btn-danger" id="btn-clear-data">
                         <span>🗑️</span>
-                        <span id="clear-label">Clear All</span>
+                        <span id="clear-label">Clear</span>
                     </button>
                 </div>
             </div>
@@ -566,21 +596,21 @@
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <button class="nav-item active" data-tab="tab-home">
+        <button class="nav-item active" data-tab="tab-ai-voice">
+            <div class="nav-icon">✨</div>
+            <div class="nav-label">AI Voice</div>
+        </button>
+        <button class="nav-item" data-tab="tab-home">
             <div class="nav-icon">🏠</div>
-            <div class="nav-label" id="nav-home">Home</div>
+            <div class="nav-label">Home</div>
         </button>
         <button class="nav-item" data-tab="tab-record">
             <div class="nav-icon">🎙️</div>
-            <div class="nav-label" id="nav-record">Record</div>
-        </button>
-        <button class="nav-item" data-tab="tab-stats">
-            <div class="nav-icon">📊</div>
-            <div class="nav-label" id="nav-stats">Stats</div>
+            <div class="nav-label">Records</div>
         </button>
         <button class="nav-item" data-tab="tab-settings">
             <div class="nav-icon">⚙️</div>
-            <div class="nav-label" id="nav-settings">Settings</div>
+            <div class="nav-label">Settings</div>
         </button>
     </div>
 

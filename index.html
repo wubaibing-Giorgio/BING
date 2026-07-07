@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#f08a80" />
-  <meta name="description" content="PapaVoice 爸爸的声音胎教：录入爸爸声音样本，播放中文、English、Italiano、Français 四国语音胎教内容。" />
+  <meta name="description" content="PapaVoice 爸爸的声音胎教：录入爸爸声音样本，AI 生成中文、English、Italiano、Français 四国语音胎教内容。" />
   <title>PapaVoice｜爸爸的声音胎教</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="app-shell" aria-label="PapaVoice four-language prenatal voice app">
+  <main class="app-shell" aria-label="PapaVoice AI prenatal voice app">
     <section class="hero card panel active" id="home-panel" data-panel="home">
-      <p class="eyebrow">👶 爸爸声音样本 · 四国语音胎教 · 本地演示版</p>
+      <p class="eyebrow">👶 AI 爸爸声线 · 四国语音胎教 · 手机声音库</p>
       <div class="brand-row">
         <div class="logo" aria-hidden="true">PV</div>
         <div>
@@ -20,45 +20,46 @@
           <p class="subtitle">爸爸的声音胎教</p>
         </div>
       </div>
-      <p class="intro">先录入爸爸 1–3 分钟声音样本，再选择中文、English、Italiano、Français 四国语言进行每日胎教播放。</p>
+      <p class="intro">先录入爸爸 1–3 分钟声音样本，部署到 Vercel 并设置 ElevenLabs API Key 后，可以把中文、English、Italiano、Français 胎教文案生成爸爸音色语音。</p>
 
       <div class="flow">
         <article>
           <strong>1. 录入爸爸声音</strong>
-          <span>请爸爸用自然语速朗读 1–3 分钟，用于建立爸爸声音样本。</span>
+          <span>爸爸自然朗读 1–3 分钟，作为 AI 声纹样本。</span>
         </article>
         <article>
-          <strong>2. 选择胎教语言</strong>
-          <span>中文 / English / Italiano / Français。</span>
+          <strong>2. 创建 AI 爸爸声纹</strong>
+          <span>通过后端接口调用语音克隆服务，生成 voiceId。</span>
         </article>
         <article>
-          <strong>3. 生成 / 播放四国语音</strong>
-          <span>当前中文播放爸爸原声，其他语言用系统语音朗读。AI 爸爸音色转换需接后端后启用。</span>
+          <strong>3. 生成四国语音</strong>
+          <span>中文 / English / Italiano / Français 都可以生成爸爸音色音频。</span>
         </article>
         <article>
-          <strong>4. 每日胎教计划</strong>
-          <span>保存孕周、宝宝昵称、提醒时间和播放统计。</span>
+          <strong>4. 手机声音库</strong>
+          <span>生成后的声音保存到 IndexedDB，本机可反复播放。</span>
         </article>
       </div>
 
       <div class="notice">
-        <strong>重要说明</strong>
-        <p>GitHub Pages 是纯静态网页，不能直接完成“爸爸声音克隆并转换成其他语言”。当前为本地演示版：可录音、保存、播放、朗读四国语言文案；真实 AI 爸爸声线转换需要后端语音克隆服务。</p>
+        <strong>上线要求</strong>
+        <p>AI 声音转换必须部署到 Vercel，并在环境变量中设置 <code>ELEVENLABS_API_KEY</code>。GitHub Pages 不能运行后端接口，只能展示前端。</p>
       </div>
 
-      <div class="quick-actions">
-        <button class="primary-button" id="home-record">录入爸爸声音样本</button>
-        <button class="secondary-button" id="home-play">开始四国语音胎教</button>
+      <div class="quick-actions three-actions">
+        <button class="primary-button" id="home-record">录入爸爸声音</button>
+        <button class="secondary-button" id="home-play">生成四国语音</button>
+        <button class="secondary-button" id="home-library">故事和音乐</button>
       </div>
     </section>
 
     <section class="card panel" id="record-panel" data-panel="record">
       <div class="section-header">
         <p class="section-label">第一步</p>
-        <span>本地保存</span>
+        <span>录音 + AI声纹</span>
       </div>
       <h2>录入爸爸声音样本</h2>
-      <p class="muted">请爸爸用自然语速朗读 1–3 分钟。录音会保存在本机浏览器里，不上传服务器。</p>
+      <p class="muted">请爸爸用自然语速朗读 1–3 分钟。录音会先保存在手机浏览器里；点击“创建 AI 爸爸声纹”后才会上传到后端。</p>
 
       <div class="recorder-box">
         <div class="recording-indicator hidden" id="recording-indicator">
@@ -77,16 +78,20 @@
       <div class="mini-card">
         <strong>已保存声音样本</strong>
         <p id="sample-status">还没有录入爸爸声音样本。</p>
-        <button class="danger-button" id="delete-recording">删除声音样本</button>
+        <div class="button-grid">
+          <button class="primary-button" id="create-voice-profile">创建 AI 爸爸声纹</button>
+          <button class="danger-button" id="delete-recording">删除声音样本</button>
+        </div>
+        <p class="hint" id="voice-profile-status">尚未创建 AI 爸爸声纹。</p>
       </div>
     </section>
 
     <section class="card panel" id="play-panel" data-panel="play">
       <div class="section-header">
         <p class="section-label">第二步 / 第三步</p>
-        <span>四国语音</span>
+        <span>AI 四国语音</span>
       </div>
-      <h2>选择语言并播放胎教内容</h2>
+      <h2>选择语言，生成爸爸音色胎教</h2>
 
       <div class="language-selector" role="tablist" aria-label="Language selector">
         <button class="lang-btn active" data-lang="zh">中文</button>
@@ -101,18 +106,38 @@
       </article>
 
       <div class="button-grid">
-        <button class="primary-button" id="play-language">播放当前语言</button>
+        <button class="primary-button" id="generate-ai-audio">生成 AI 爸爸声线</button>
+        <button class="secondary-button" id="play-language">本地试听 / 系统朗读</button>
         <button class="secondary-button" id="stop-speech">停止播放</button>
       </div>
 
+      <audio id="generated-audio-player" controls class="audio-player hidden"></audio>
+
       <div class="ai-box">
         <div>
-          <p class="section-label">Coming soon</p>
-          <h3>AI 爸爸声线四国语音转换</h3>
-          <p>录入爸爸声音后，未来可接入后端语音克隆服务，把英文、意大利语、法语也生成爸爸音色。</p>
+          <p class="section-label">AI Voice</p>
+          <h3>真正可交互的爸爸声线转换</h3>
+          <p>创建声纹后，点击“生成 AI 爸爸声线”，系统会调用后端接口生成当前语言音频，并自动保存到手机声音库。</p>
         </div>
-        <button class="secondary-button" id="ai-convert">需要后端语音克隆服务后启用</button>
+        <button class="secondary-button" id="ai-convert">查看使用条件</button>
       </div>
+
+      <div class="mini-card">
+        <strong>我的声音库</strong>
+        <div id="generated-audio-list" class="audio-library-list">
+          <p class="muted">还没有生成 AI 爸爸声线。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card panel" id="library-panel" data-panel="library">
+      <div class="section-header">
+        <p class="section-label">胎教内容</p>
+        <span>故事 + 音乐</span>
+      </div>
+      <h2>高级胎教故事和音乐入口</h2>
+      <p class="muted">先接入安全的外部内容入口，不直接盗链音频。你可以打开这些网站挑选适合的故事、古典音乐，再把文本放进 PapaVoice 生成爸爸音色。</p>
+      <div id="content-source-list" class="source-list"></div>
     </section>
 
     <section class="card panel" id="plan-panel" data-panel="plan">
@@ -171,7 +196,7 @@
       </div>
       <div class="mini-card">
         <strong>数据说明</strong>
-        <p>录音、宝宝信息和统计只保存在当前手机浏览器，不会上传。换手机或清除浏览器数据后会消失。</p>
+        <p>爸爸录音、AI 生成音频和设置保存在当前手机浏览器。生成 AI 声音时会通过 Vercel 后端调用 ElevenLabs。</p>
         <button class="danger-button" id="clear-data">清空本地数据</button>
       </div>
     </section>
@@ -181,7 +206,8 @@
     <nav class="tabbar" aria-label="Primary navigation">
       <button class="nav-item active" data-target="home">首页</button>
       <button class="nav-item" data-target="record">录音</button>
-      <button class="nav-item" data-target="play">播放</button>
+      <button class="nav-item" data-target="play">生成</button>
+      <button class="nav-item" data-target="library">内容</button>
       <button class="nav-item" data-target="plan">计划</button>
       <button class="nav-item" data-target="settings">设置</button>
     </nav>

@@ -1,62 +1,26 @@
 {
-  "name": "PapaVoice - Prenatal Education with Voice Interactions",
+  "name": "PapaVoice｜爸爸的声音胎教",
   "short_name": "PapaVoice",
-  "description": "A mobile-first PWA for prenatal education with voice recording, playback, and multilingual support",
-  "start_url": "/papavoice/index.html",
-  "scope": "/papavoice/",
+  "description": "录入爸爸声音，生成中文、英文、意大利语与法语胎教语音。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#6366f1",
-  "background_color": "#ffffff",
+  "theme_color": "#8a6759",
+  "background_color": "#f6efe6",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%236366f1' width='192' height='192'/><text x='96' y='140' font-size='120' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'>P</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect rx='48' fill='%238a6759' width='192' height='192'/><path d='M68 74v44M96 56v80M124 74v44M46 88v16M146 88v16' stroke='white' stroke-width='12' stroke-linecap='round'/></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%236366f1' width='512' height='512'/><text x='256' y='380' font-size='320' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'>P</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect rx='128' fill='%238a6759' width='512' height='512'/><path d='M182 198v116M256 150v212M330 198v116M120 234v44M392 234v44' stroke='white' stroke-width='32' stroke-linecap='round'/></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["education", "health"],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%236366f1' width='540' height='720'/><text x='270' y='360' font-size='80' fill='white' text-anchor='middle' font-family='Arial'>PapaVoice</text></svg>",
-      "sizes": "540x720",
-      "type": "image/svg+xml"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Start Recording",
-      "short_name": "Record",
-      "description": "Quickly start recording your voice",
-      "url": "/papavoice/index.html?tab=record",
-      "icons": []
-    },
-    {
-      "name": "View Statistics",
-      "short_name": "Stats",
-      "description": "View your usage statistics",
-      "url": "/papavoice/index.html?tab=stats",
-      "icons": []
-    }
-  ],
-  "share_target": {
-    "action": "/papavoice/index.html",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "files": [
-        {
-          "name": "audio",
-          "accept": ["audio/*"]
-        }
-      ]
-    }
-  }
+  ]
 }

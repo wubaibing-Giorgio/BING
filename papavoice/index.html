@@ -1,620 +1,456 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="description" content="PapaVoice - AI Voice Cloning Prenatal Education">
-    <title>PapaVoice - AI智能声纹克隆胎教</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%236366f1' width='192' height='192'/><text x='96' y='140' font-size='120' font-weight='bold' fill='white' text-anchor='middle' font-family='Arial'>P</text></svg>">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#8a6759" />
+  <meta name="description" content="PapaVoice：录入爸爸声音，生成中文、英文、意大利语和法语胎教语音。" />
+  <meta name="papavoice-api-base" content="/api" />
+  <title>PapaVoice｜爸爸的声音胎教</title>
+  <link rel="manifest" href="./manifest.json" />
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #382f2a;
+      --muted: #796c64;
+      --paper: #fffdf9;
+      --cream: #f6efe6;
+      --cream-deep: #eadccd;
+      --cocoa: #7f5f52;
+      --cocoa-dark: #62463b;
+      --sage: #6f8871;
+      --sage-soft: #e7efe6;
+      --rose: #bd786f;
+      --rose-soft: #f7e9e5;
+      --line: rgba(96, 69, 57, .14);
+      --shadow: 0 20px 60px rgba(77, 50, 36, .10);
+      --radius: 24px;
+    }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow-x: hidden;
-        }
+    * { box-sizing: border-box; }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            padding-bottom: 80px;
-        }
+    html { scroll-behavior: smooth; }
 
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            color: white;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -5%, rgba(241, 211, 187, .55), transparent 35%),
+        radial-gradient(circle at 95% 15%, rgba(212, 224, 208, .50), transparent 34%),
+        var(--cream);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
+    button, textarea, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
 
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
+    .shell {
+      width: min(100%, 720px);
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 16px calc(42px + env(safe-area-inset-bottom));
+    }
 
-        .container {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            max-width: 600px;
-            margin: 0 auto;
-            width: 100%;
-        }
+    .hero {
+      padding: 20px 4px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
 
-        .section {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
 
-        .section h2 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 2px solid #6366f1;
-            padding-bottom: 10px;
-        }
+    .brand-mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: linear-gradient(145deg, #947165, #6e4e43);
+      box-shadow: 0 10px 24px rgba(95, 66, 55, .22);
+      flex: 0 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .step-indicator {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 50%;
+    }
 
-        .step-box {
-            text-align: center;
-            padding: 10px;
-            background: #f3f4f6;
-            border-radius: 8px;
-            border: 2px solid #e5e7eb;
-            font-size: 12px;
-            font-weight: 600;
-            color: #666;
-        }
+    .brand-mark svg { width: 27px; height: 27px; position: relative; z-index: 1; }
 
-        .step-box.active {
-            background: #6366f1;
-            color: white;
-            border-color: #6366f1;
-        }
+    .brand h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 27px; letter-spacing: -.6px; }
+    .brand p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 
-        .step-box.completed {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
+    .service-pill {
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 249, .72);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex: 0 0 auto;
+    }
 
-        .voice-clone-section {
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: #fafafa;
-        }
+    .service-dot { width: 8px; height: 8px; border-radius: 50%; background: #b9aaa1; }
+    .service-pill[data-mode="ai"] .service-dot { background: #6d9a72; box-shadow: 0 0 0 4px rgba(109,154,114,.12); }
+    .service-pill[data-mode="demo"] .service-dot { background: #d19962; box-shadow: 0 0 0 4px rgba(209,153,98,.12); }
 
-        .voice-clone-section h3 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #333;
-            font-weight: 700;
-        }
+    .intro {
+      background: rgba(255, 253, 249, .78);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 30px;
+      padding: 26px 22px 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      margin-bottom: 14px;
+    }
 
-        .language-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+    .eyebrow { color: var(--cocoa); font-size: 12px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; }
+    .intro h2 { margin: 9px 0 9px; font-size: clamp(27px, 7vw, 38px); line-height: 1.18; letter-spacing: -1.2px; }
+    .intro-copy { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.75; }
 
-        .lang-btn {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
+    .language-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .language-chip { padding: 7px 10px; border-radius: 999px; background: white; border: 1px solid var(--line); font-size: 12px; font-weight: 700; color: #5d514b; }
 
-        .lang-btn:hover {
-            border-color: #6366f1;
-            background: #f3f4f6;
-        }
+    .mode-banner {
+      margin: 14px 0;
+      padding: 13px 15px;
+      border-radius: 17px;
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #65574f;
+      background: #fff9ee;
+      border: 1px solid #ead8bd;
+    }
+    .mode-banner[data-mode="ai"] { background: var(--sage-soft); border-color: #cbdac9; color: #536a55; }
+    .mode-icon { font-size: 17px; line-height: 1.3; }
 
-        .lang-btn.active {
-            background: #6366f1;
-            color: white;
-            border-color: #6366f1;
-        }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin: 18px 0 14px;
+      padding: 0 2px;
+      position: relative;
+    }
 
-        .prenatal-content {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #6366f1;
-        }
+    .steps::before {
+      content: "";
+      position: absolute;
+      top: 16px;
+      left: 12.5%;
+      right: 12.5%;
+      height: 1px;
+      background: #d9cbc0;
+      z-index: 0;
+    }
 
-        .prenatal-content p {
-            font-size: 15px;
-            line-height: 1.6;
-            color: #555;
-            margin-bottom: 10px;
-        }
+    .step { position: relative; z-index: 1; text-align: center; color: #998c84; font-size: 11px; font-weight: 700; }
+    .step-number { width: 33px; height: 33px; display: grid; place-items: center; margin: 0 auto 7px; border-radius: 50%; background: var(--cream); border: 1px solid #d9cbc0; color: #8d7e75; }
+    .step.is-active { color: var(--cocoa-dark); }
+    .step.is-active .step-number { background: var(--cocoa); color: white; border-color: var(--cocoa); box-shadow: 0 0 0 5px rgba(127,95,82,.10); }
+    .step.is-complete .step-number { background: var(--sage); color: white; border-color: var(--sage); }
 
-        .control-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+    .card {
+      background: var(--paper);
+      border: 1px solid rgba(255,255,255,.92);
+      border-radius: var(--radius);
+      padding: 21px 19px;
+      margin-top: 14px;
+      box-shadow: 0 14px 42px rgba(77,50,36,.08);
+      transition: opacity .25s ease, transform .25s ease;
+    }
 
-        button {
-            padding: 12px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+    .card[data-state="locked"] { opacity: .48; pointer-events: none; }
+    .card[data-state="active"] { border-color: rgba(127,95,82,.20); }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .card-kicker { color: var(--cocoa); font-size: 11px; font-weight: 800; letter-spacing: .8px; }
+    .card h3 { margin: 5px 0 0; font-size: 20px; letter-spacing: -.4px; }
+    .card-badge { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; background: var(--cream); color: var(--muted); font-size: 11px; font-weight: 700; }
+    .helper { color: var(--muted); font-size: 13px; line-height: 1.65; margin: 0 0 15px; }
 
-        .btn-primary {
-            background: #6366f1;
-            color: white;
-        }
+    .reading-script { background: #f9f5ef; border: 1px dashed #d8c6b7; border-radius: 17px; padding: 13px 14px; margin: 14px 0; color: #68584f; font-size: 13px; line-height: 1.7; }
+    .reading-script strong { color: var(--ink); }
 
-        .btn-primary:hover:not(:disabled) {
-            background: #4f46e5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
+    .consent {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 13px;
+      border-radius: 16px;
+      background: #faf7f2;
+      color: #675a52;
+      font-size: 12px;
+      line-height: 1.55;
+      cursor: pointer;
+    }
+    .consent input { width: 18px; height: 18px; accent-color: var(--cocoa); flex: 0 0 auto; margin-top: 1px; }
 
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    .recorder {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin: 14px 0 10px;
+    }
 
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
+    .button {
+      min-height: 49px;
+      border: 0;
+      border-radius: 16px;
+      padding: 12px 17px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform .15s ease, opacity .2s ease, box-shadow .2s ease;
+    }
+    .button:active:not(:disabled) { transform: scale(.98); }
+    .button:focus-visible { outline: 3px solid rgba(127,95,82,.25); outline-offset: 2px; }
+    .button:disabled { opacity: .45; cursor: not-allowed; }
+    .button-primary { color: white; background: linear-gradient(135deg, #8b675a, #6a4c41); box-shadow: 0 10px 20px rgba(106,76,65,.17); }
+    .button-record { color: white; background: linear-gradient(135deg, #c67f75, #a95f59); box-shadow: 0 10px 20px rgba(169,95,89,.16); }
+    .button-secondary { color: var(--cocoa-dark); background: #efe4da; }
+    .button-ghost { color: var(--muted); background: transparent; border: 1px solid var(--line); min-height: 42px; padding: 9px 13px; }
+    .button-wide { width: 100%; }
 
-        .btn-danger:hover:not(:disabled) {
-            background: #dc2626;
-        }
+    .timer-panel {
+      border-radius: 16px;
+      min-width: 84px;
+      padding: 10px 13px;
+      background: #f6eee8;
+      display: grid;
+      place-items: center;
+      color: #775d53;
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+    }
 
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
+    .recording-meta { min-height: 20px; color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 8px; }
+    .pulse { width: 8px; height: 8px; background: #c56860; border-radius: 50%; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 50% { opacity: .35; transform: scale(.8); } }
 
-        .btn-success:hover:not(:disabled) {
-            background: #059669;
-        }
+    .audio-preview { margin: 14px 0; padding: 12px; border-radius: 16px; background: #f7f3ee; }
+    audio { display: block; width: 100%; height: 42px; }
 
-        .recording-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            background: #fee2e2;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            color: #991b1b;
-            font-weight: 500;
-        }
+    .status { min-height: 20px; margin-top: 11px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .status.is-success { color: #55755a; }
+    .status.is-error { color: #a34e49; }
 
-        .recording-dot {
-            width: 12px;
-            height: 12px;
-            background: #ef4444;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
+    .voice-ready { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 13px; border-radius: 16px; background: var(--sage-soft); color: #536a55; margin-bottom: 15px; font-size: 12px; font-weight: 700; }
 
-        @keyframes blink {
-            0%, 50%, 100% { opacity: 1; }
-            25%, 75% { opacity: 0.4; }
-        }
+    .preset-row { display: flex; gap: 8px; overflow-x: auto; padding: 1px 1px 8px; scrollbar-width: none; }
+    .preset-row::-webkit-scrollbar { display: none; }
+    .preset { border: 1px solid var(--line); background: white; color: #6b5b52; padding: 9px 12px; border-radius: 999px; white-space: nowrap; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .preset.is-selected { background: #efe4da; border-color: #c9afa0; color: var(--cocoa-dark); }
 
-        .recording-timer {
-            font-size: 14px;
-            font-family: 'Courier New', monospace;
-        }
+    .textarea-wrap { position: relative; margin-top: 8px; }
+    textarea { width: 100%; min-height: 145px; resize: vertical; padding: 15px 15px 36px; border: 1px solid #dfd2c8; border-radius: 18px; background: #fffefa; color: var(--ink); line-height: 1.7; font-size: 15px; outline: none; }
+    textarea:focus { border-color: #a58475; box-shadow: 0 0 0 4px rgba(133,98,82,.08); }
+    .char-count { position: absolute; right: 13px; bottom: 11px; color: #9d9088; font-size: 11px; }
 
-        audio {
-            width: 100%;
-            margin: 10px 0;
-        }
+    .generate-note { margin: 11px 0 13px; color: var(--muted); font-size: 12px; line-height: 1.55; }
 
-        .audio-player {
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f3f4f6;
-            border-radius: 8px;
-        }
+    .result-grid { display: grid; gap: 11px; }
+    .result-card { border: 1px solid var(--line); border-radius: 18px; padding: 14px; background: #fcfaf7; }
+    .result-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+    .result-language { font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .result-state { color: var(--muted); font-size: 11px; }
+    .result-text { margin: 0 0 11px; color: #6b5d55; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+    .result-actions { display: flex; gap: 8px; margin-top: 9px; }
+    .result-actions .button { flex: 1; min-height: 40px; padding: 8px 10px; font-size: 12px; border-radius: 13px; }
+    .spinner { width: 14px; height: 14px; border: 2px solid #d8cbc3; border-top-color: var(--cocoa); border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; vertical-align: -2px; margin-right: 5px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .audio-language {
-            font-weight: 700;
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
+    .footer { text-align: center; color: #8f827a; font-size: 11px; line-height: 1.6; padding: 24px 18px 0; }
 
-        .download-btn {
-            background: #10b981;
-            color: white;
-            padding: 8px 12px;
-            font-size: 12px;
-            width: 100%;
-            margin-top: 10px;
-        }
+    .toast {
+      position: fixed;
+      z-index: 100;
+      left: 50%;
+      bottom: calc(22px + env(safe-area-inset-bottom));
+      transform: translate(-50%, 20px);
+      width: min(calc(100% - 32px), 520px);
+      padding: 13px 15px;
+      border-radius: 15px;
+      background: rgba(55, 44, 39, .94);
+      color: white;
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      box-shadow: 0 14px 34px rgba(0,0,0,.2);
+    }
+    .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
+    @media (min-width: 640px) {
+      .shell { padding-left: 22px; padding-right: 22px; }
+      .intro { padding: 32px 30px 27px; }
+      .card { padding: 25px 24px; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
 
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
+    @media (max-width: 390px) {
+      .hero { align-items: flex-start; }
+      .brand-mark { width: 48px; height: 48px; border-radius: 16px; }
+      .brand h1 { font-size: 24px; }
+      .brand p { display: none; }
+      .service-pill { padding: 7px 9px; }
+      .step { font-size: 10px; }
+      .card { padding: 19px 16px; }
+    }
 
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .info-box {
-            background: #eff6ff;
-            border-left: 4px solid #3b82f6;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #1e40af;
-        }
-
-        .warning-box {
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #92400e;
-        }
-
-        .error-box {
-            background: #fee2e2;
-            border-left: 4px solid #ef4444;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #991b1b;
-        }
-
-        .success-box {
-            background: #d1fae5;
-            border-left: 4px solid #10b981;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #065f46;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 15px;
-            font-family: inherit;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .char-count {
-            font-size: 12px;
-            color: #999;
-            text-align: right;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e5e7eb;
-            border-radius: 3px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid #e5e7eb;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0;
-            padding: 0;
-            height: 70px;
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            color: #999;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            padding: 8px;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-            color: #6366f1;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @media (max-width: 480px) {
-            .step-indicator {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🎙️ PapaVoice AI</h1>
-        <p>Real AI Voice Cloning Prenatal Education</p>
+  <div class="shell">
+    <header class="hero">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M8.5 9.2v5.6M12 7v10M15.5 9.2v5.6M5 11v2M19 11v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <h1>PapaVoice</h1>
+          <p>爸爸的声音胎教</p>
+        </div>
+      </div>
+      <div id="service-pill" class="service-pill" data-mode="checking" aria-live="polite">
+        <span class="service-dot" aria-hidden="true"></span>
+        <span id="service-pill-text">检测服务</span>
+      </div>
+    </header>
+
+    <section class="intro">
+      <div class="eyebrow">A voice that stays close</div>
+      <h2>让宝宝听见<br />爸爸熟悉的声音</h2>
+      <p class="intro-copy">录入一次爸爸声音，输入想说的话，即可生成同一音色的四国语音。</p>
+      <div class="language-row" aria-label="支持的语言">
+        <span class="language-chip">🇨🇳 中文</span>
+        <span class="language-chip">🇬🇧 English</span>
+        <span class="language-chip">🇮🇹 Italiano</span>
+        <span class="language-chip">🇫🇷 Français</span>
+      </div>
+    </section>
+
+    <div id="mode-banner" class="mode-banner" data-mode="checking" role="status" aria-live="polite">
+      <span class="mode-icon" aria-hidden="true">◌</span>
+      <span id="mode-banner-text">正在检查真实爸爸音色服务……</span>
     </div>
 
-    <div class="container">
-        <!-- AI Voice Cloning Tab -->
-        <div id="tab-ai-voice" class="tab-content active">
-            <div class="section">
-                <h2>✨ Step-by-Step Voice Cloning</h2>
-                
-                <div class="step-indicator">
-                    <div class="step-box active" id="step-1">1️⃣ Record</div>
-                    <div class="step-box" id="step-2">2️⃣ Upload</div>
-                    <div class="step-box" id="step-3">3️⃣ Input</div>
-                    <div class="step-box" id="step-4">4️⃣ Generate</div>
-                </div>
+    <nav class="steps" aria-label="制作步骤">
+      <div id="progress-1" class="step is-active"><span class="step-number">1</span><span>录声音</span></div>
+      <div id="progress-2" class="step"><span class="step-number">2</span><span>建音色</span></div>
+      <div id="progress-3" class="step"><span class="step-number">3</span><span>写内容</span></div>
+      <div id="progress-4" class="step"><span class="step-number">4</span><span>听四语</span></div>
+    </nav>
 
-                <div id="api-status-box" class="info-box" style="display: none;">
-                    <span id="api-status-text">Loading service status...</span>
-                </div>
+    <main>
+      <section id="step-record" class="card" data-state="active" aria-labelledby="record-title">
+        <div class="card-head">
+          <div>
+            <div class="card-kicker">STEP 01</div>
+            <h3 id="record-title">录入爸爸声音</h3>
+          </div>
+          <span class="card-badge">建议 30–60 秒</span>
+        </div>
+        <p class="helper">找一个安静房间，手机距离嘴巴约 20 厘米，用平时说话的语气连续朗读。至少录满 15 秒。</p>
 
-                <!-- Step 1: Record Dad's Voice -->
-                <div class="voice-clone-section" id="step-1-section">
-                    <h3>Step 1: Record Dad's Voice (30-60 seconds)</h3>
-                    <div id="recording-indicator" class="recording-indicator" style="display: none;">
-                        <div class="recording-dot"></div>
-                        <span>Recording...</span>
-                        <span class="recording-timer" id="recording-time">00:00</span>
-                    </div>
-                    <div class="control-buttons">
-                        <button class="btn-danger" id="btn-start-record">
-                            <span>🎤</span>
-                            <span>Start</span>
-                        </button>
-                        <button class="btn-primary" id="btn-stop-record" disabled>
-                            <span>⏹️</span>
-                            <span>Stop</span>
-                        </button>
-                    </div>
-                    <div id="recording-preview" style="display: none; margin-top: 15px;">
-                        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">✅ Recording saved:</p>
-                        <audio id="preview-audio" style="width: 100%; margin-bottom: 10px;" controls></audio>
-                    </div>
-                </div>
-
-                <!-- Step 2: Upload to Server -->
-                <div class="voice-clone-section" id="step-2-section" style="display: none;">
-                    <h3>Step 2: Upload to Create Voice Clone</h3>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Upload your recording to create an AI voice clone.</p>
-                    <button class="btn-primary" id="btn-upload-voice" style="width: 100%;">
-                        <span>☁️</span>
-                        <span>Upload & Create Clone</span>
-                    </button>
-                    <div id="upload-status" style="margin-top: 15px;"></div>
-                </div>
-
-                <!-- Step 3: Input Text -->
-                <div class="voice-clone-section" id="step-3-section" style="display: none;">
-                    <h3>Step 3: What Do You Want to Say?</h3>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Enter your message in Chinese (max 500 characters):</p>
-                    <textarea id="message-input" class="input-field" placeholder="亲爱的宝宝，爸爸想对你说..." style="min-height: 100px; resize: vertical;"></textarea>
-                    <div class="char-count"><span id="char-count">0</span>/500</div>
-                </div>
-
-                <!-- Step 4: Generate & Play -->
-                <div class="voice-clone-section" id="step-4-section" style="display: none;">
-                    <h3>Step 4: Generate 4-Language Audio</h3>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Your message in 4 languages with AI voice:</p>
-                    <button class="btn-success" id="btn-generate-audio" style="width: 100%;">
-                        <span>🌍</span>
-                        <span>Generate Multilingual Audio</span>
-                    </button>
-                    <div id="audio-results" style="margin-top: 15px;"></div>
-                </div>
-            </div>
+        <div class="reading-script">
+          <strong>可以照着读：</strong><br />亲爱的宝宝，我是爸爸。今天我想把温柔的声音送给你。愿你健康、平安、快乐地长大，我们都很期待与你见面。
         </div>
 
-        <!-- Home Tab -->
-        <div id="tab-home" class="tab-content">
-            <div class="section">
-                <h2>Choose Language</h2>
-                <div class="language-selector">
-                    <button class="lang-btn active" data-lang="zh">🇨🇳 中文</button>
-                    <button class="lang-btn" data-lang="en">🇺🇸 English</button>
-                    <button class="lang-btn" data-lang="it">🇮🇹 Italiano</button>
-                    <button class="lang-btn" data-lang="fr">🇫🇷 Français</button>
-                </div>
-            </div>
+        <label class="consent">
+          <input id="voice-consent" type="checkbox" />
+          <span>我确认录音为爸爸本人声音，并已获得本人同意，仅用于生成家庭胎教语音。</span>
+        </label>
 
-            <div class="section">
-                <h2 id="prenatal-title">Prenatal Education Content</h2>
-                <div id="prenatal-list"></div>
-            </div>
+        <div class="recorder">
+          <button id="record-button" class="button button-record" type="button">
+            <span aria-hidden="true">●</span><span>开始录音</span>
+          </button>
+          <div id="record-timer" class="timer-panel" aria-label="录音时长">00:00</div>
+        </div>
+        <button id="stop-button" class="button button-secondary button-wide" type="button" disabled>停止并试听</button>
+        <div id="recording-meta" class="recording-meta" aria-live="polite">录音不会在点击“建立音色”前上传。</div>
 
-            <div class="section">
-                <h2 id="playback-title">Playback Options</h2>
-                <div class="control-buttons">
-                    <button class="btn-success" id="btn-speak-prenatal">
-                        <span>🔊</span>
-                        <span id="speak-label">Speak</span>
-                    </button>
-                    <button class="btn-primary" id="btn-play-recording">
-                        <span>▶️</span>
-                        <span id="play-label">Play Recording</span>
-                    </button>
-                </div>
-            </div>
+        <div id="recording-preview" class="audio-preview" hidden>
+          <audio id="preview-audio" controls preload="metadata"></audio>
         </div>
 
-        <!-- Record Tab -->
-        <div id="tab-record" class="tab-content">
-            <div class="section">
-                <h2>📋 My Recordings</h2>
-                <div id="recordings-list"></div>
-            </div>
+        <button id="upload-button" class="button button-primary button-wide" type="button" disabled>建立爸爸专属音色</button>
+        <div id="clone-status" class="status" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="step-message" class="card" data-state="locked" aria-labelledby="message-title">
+        <div class="card-head">
+          <div>
+            <div class="card-kicker">STEP 02</div>
+            <h3 id="message-title">写下想对宝宝说的话</h3>
+          </div>
+          <span class="card-badge">最多 500 字</span>
         </div>
 
-        <!-- Statistics Tab -->
-        <div id="tab-stats" class="tab-content">
-            <div class="section">
-                <h2 id="stats-title">📊 Usage Statistics</h2>
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-plays">0</div>
-                        <div class="stat-label" id="stat-plays-label">Total Plays</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-recordings">0</div>
-                        <div class="stat-label" id="stat-recordings-label">Recordings</div>
-                    </div>
-                </div>
-            </div>
+        <div id="voice-ready" class="voice-ready" hidden>
+          <span id="voice-ready-text">✓ 爸爸音色已准备好</span>
+          <button id="reset-voice-button" class="button button-ghost" type="button">重新录入</button>
         </div>
 
-        <!-- Settings Tab -->
-        <div id="tab-settings" class="tab-content">
-            <div class="section">
-                <h2>💾 Data Management</h2>
-                <div class="control-buttons">
-                    <button class="btn-primary" id="btn-export-data">
-                        <span>📥</span>
-                        <span id="export-label">Export</span>
-                    </button>
-                    <button class="btn-danger" id="btn-clear-data">
-                        <span>🗑️</span>
-                        <span id="clear-label">Clear</span>
-                    </button>
-                </div>
-            </div>
+        <p class="helper">可以选一段现成文案，也可以直接写自己的内容。正式模式支持任意中文文案。</p>
+        <div id="preset-row" class="preset-row" aria-label="胎教文案模板">
+          <button class="preset is-selected" type="button" data-preset="goodnight">晚安陪伴</button>
+          <button class="preset" type="button" data-preset="blessing">平安祝福</button>
+          <button class="preset" type="button" data-preset="story">第一次见面</button>
         </div>
-    </div>
+        <div class="textarea-wrap">
+          <textarea id="message-input" maxlength="500" placeholder="亲爱的宝宝，爸爸想对你说……"></textarea>
+          <span class="char-count"><span id="char-count">0</span>/500</span>
+        </div>
+        <p id="generate-note" class="generate-note">生成时会先制作中文，再翻译并保留爸爸音色生成英、意、法三种语言。</p>
+        <button id="generate-button" class="button button-primary button-wide" type="button">生成四国语音</button>
+      </section>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <button class="nav-item active" data-tab="tab-ai-voice">
-            <div class="nav-icon">✨</div>
-            <div class="nav-label">AI Voice</div>
-        </button>
-        <button class="nav-item" data-tab="tab-home">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Home</div>
-        </button>
-        <button class="nav-item" data-tab="tab-record">
-            <div class="nav-icon">🎙️</div>
-            <div class="nav-label">Records</div>
-        </button>
-        <button class="nav-item" data-tab="tab-settings">
-            <div class="nav-icon">⚙️</div>
-            <div class="nav-label">Settings</div>
-        </button>
-    </div>
+      <section id="step-results" class="card" data-state="locked" aria-labelledby="results-title">
+        <div class="card-head">
+          <div>
+            <div class="card-kicker">STEP 03</div>
+            <h3 id="results-title">爸爸的四国语音</h3>
+          </div>
+          <span class="card-badge">可播放与保存</span>
+        </div>
+        <p id="generation-status" class="helper" role="status" aria-live="polite">生成完成后，四种语言会显示在这里。</p>
+        <div id="results-grid" class="result-grid"></div>
+      </section>
+    </main>
 
-    <script src="ai-voice-handler.js"></script>
-    <script src="script.js"></script>
+    <footer class="footer">
+      真实模式会把经你确认的录音发送至 ElevenLabs 建立音色。请勿上传未经本人授权的声音。<br />PapaVoice · 爸爸的声音胎教
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+  <script src="./app.js?v=2.0.0" defer></script>
 </body>
 </html>

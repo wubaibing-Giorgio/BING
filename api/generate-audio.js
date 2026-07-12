@@ -1,164 +1,261 @@
-/**
- * Vercel Function: Generate multilingual audio with AI voice cloning
- * Endpoint: POST /api/generate-audio
- * 
- * Request:
- * - text: input text (Chinese)
- * - language: target language (zh, en, it, fr)
- * - voiceId: the cloned voice_id
- * 
- * Response:
- * - audioUrl: URL to generated audio
- * - duration: audio duration in seconds
- */
-
+import FormData from 'form-data';
 import fetch from 'node-fetch';
 
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1';
+const SUPPORTED_LANGUAGES = new Set(['zh', 'en', 'it', 'fr']);
+const MAX_TEXT_LENGTH = 500;
+const MAX_SOURCE_AUDIO_BYTES = 4 * 1024 * 1024;
+const DUB_POLL_INTERVAL_MS = 2500;
+const DUB_TIMEOUT_MS = 90_000;
 
-// Language code mappings
-const LANGUAGE_CODES = {
-  zh: 'zh',      // Chinese
-  en: 'en',      // English
-  it: 'it',      // Italian
-  fr: 'fr'       // French
-};
+export const VOICE_SETTINGS = Object.freeze({
+  stability: 0.35,
+  similarity_boost: 0.85,
+  style: 0.4,
+  use_speaker_boost: true
+});
 
-// Translate text to target language using a simple API or stored translations
-async function translateText(text, targetLanguage) {
-  // For now, return a simple translation
-  // In production, use Google Translate API or similar
-  const translations = {
-    zh: text, // Original Chinese
-    en: translateToEnglish(text),
-    it: translateToItalian(text),
-    fr: translateToFrench(text)
-  };
-  return translations[targetLanguage] || text;
+function setCors(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store');
 }
 
-// Simple translation functions (placeholder - use real translation API in production)
-function translateToEnglish(text) {
-  const dict = {
-    '亲爱的宝宝': 'Dear baby',
-    '爸爸': 'dad',
-    '妈妈': 'mom',
-    '我爱你': 'I love you',
-    '美好': 'beautiful',
-    '祝福': 'blessing',
-    '成长': 'growth',
-    '健康': 'healthy',
-    '快乐': 'happy',
-    '温暖': 'warm'
-  };
-  
-  let result = text;
-  for (const [zh, en] of Object.entries(dict)) {
-    result = result.replace(zh, en);
+function parseBody(body) {
+  if (typeof body === 'string') {
+    try {
+      return JSON.parse(body);
+    } catch {
+      return null;
+    }
   }
-  return result || '[English translation required - please provide actual translation]';
+  return body && typeof body === 'object' ? body : null;
 }
 
-function translateToItalian(text) {
-  return '[Traduzione italiana - ' + text + ']';
+export function validateGenerationInput(body) {
+  const text = String(body?.text || '').trim();
+  const language = String(body?.language || 'zh').toLowerCase();
+  const voiceId = String(body?.voiceId || '').trim();
+
+  if (!text) throw new Error('请输入想对宝宝说的话');
+  if (text.length > MAX_TEXT_LENGTH) throw new Error(`文案不能超过 ${MAX_TEXT_LENGTH} 个字`);
+  if (!SUPPORTED_LANGUAGES.has(language)) throw new Error('不支持这个语言');
+  if (!/^[A-Za-z0-9_-]{5,100}$/.test(voiceId)) throw new Error('爸爸音色 ID 无效，请重新录制');
+
+  return { text, language, voiceId };
 }
 
-function translateToFrench(text) {
-  return '[Traduction française - ' + text + ']';
+function parseSourceAudio(sourceAudio) {
+  if (typeof sourceAudio !== 'string' || !sourceAudio) {
+    throw new Error('生成外语版本前需要先生成中文语音');
+  }
+
+  const match = sourceAudio.match(/^data:audio\/mpeg;base64,(.+)$/s);
+  const base64 = (match?.[1] || sourceAudio).replace(/\s/g, '');
+  if (base64.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
+    throw new Error('中文语音数据无效');
+  }
+
+  const buffer = Buffer.from(base64, 'base64');
+  if (!buffer.length || buffer.length > MAX_SOURCE_AUDIO_BYTES) {
+    throw new Error('中文语音文件为空或过大');
+  }
+  return buffer;
+}
+
+async function createChineseSpeech({ text, voiceId, apiKey }) {
+  const response = await fetch(
+    `${ELEVENLABS_API_URL}/text-to-speech/${encodeURIComponent(voiceId)}?output_format=mp3_44100_128`,
+    {
+      method: 'POST',
+      headers: {
+        'xi-api-key': apiKey,
+        'Content-Type': 'application/json',
+        Accept: 'audio/mpeg'
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: VOICE_SETTINGS
+      })
+    }
+  );
+
+  if (!response.ok) {
+    const details = await response.text();
+    const error = new Error('中文语音生成失败');
+    error.status = response.status;
+    error.details = details;
+    throw error;
+  }
+
+  return response.buffer();
+}
+
+async function createDub({ sourceBuffer, targetLanguage, apiKey }) {
+  const form = new FormData();
+  form.append('file', sourceBuffer, {
+    filename: 'papavoice-source.mp3',
+    contentType: 'audio/mpeg',
+    knownLength: sourceBuffer.length
+  });
+  form.append('name', `PapaVoice ${targetLanguage} ${Date.now()}`);
+  form.append('source_lang', 'zh');
+  form.append('target_lang', targetLanguage);
+  form.append('num_speakers', '1');
+  form.append('drop_background_audio', 'true');
+  form.append('disable_voice_cloning', 'false');
+
+  const response = await fetch(`${ELEVENLABS_API_URL}/dubbing`, {
+    method: 'POST',
+    headers: {
+      'xi-api-key': apiKey,
+      ...form.getHeaders()
+    },
+    body: form
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.dubbing_id) {
+    const error = new Error('外语翻译任务创建失败');
+    error.status = response.status;
+    error.details = JSON.stringify(data);
+    throw error;
+  }
+  return data.dubbing_id;
+}
+
+async function waitForDub({ dubbingId, apiKey }) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < DUB_TIMEOUT_MS) {
+    const response = await fetch(`${ELEVENLABS_API_URL}/dubbing/${encodeURIComponent(dubbingId)}`, {
+      headers: { 'xi-api-key': apiKey }
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const error = new Error('读取外语生成进度失败');
+      error.status = response.status;
+      throw error;
+    }
+    if (data.status === 'dubbed') return data;
+    if (data.status === 'failed') {
+      const error = new Error(data.error || '外语版本生成失败');
+      error.status = 422;
+      throw error;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, DUB_POLL_INTERVAL_MS));
+  }
+
+  const timeoutError = new Error('外语版本生成超时，请稍后重试');
+  timeoutError.status = 504;
+  throw timeoutError;
+}
+
+async function fetchDubResult({ dubbingId, language, apiKey }) {
+  const [audioResponse, transcriptResponse] = await Promise.all([
+    fetch(`${ELEVENLABS_API_URL}/dubbing/${encodeURIComponent(dubbingId)}/audio/${language}`, {
+      headers: { 'xi-api-key': apiKey, Accept: 'audio/mpeg' }
+    }),
+    fetch(`${ELEVENLABS_API_URL}/dubbing/${encodeURIComponent(dubbingId)}/transcripts/${language}/format/json`, {
+      headers: { 'xi-api-key': apiKey }
+    })
+  ]);
+
+  if (!audioResponse.ok) {
+    const error = new Error('外语音频下载失败');
+    error.status = audioResponse.status;
+    throw error;
+  }
+
+  const audioBuffer = await audioResponse.buffer();
+  let translatedText = '';
+
+  if (transcriptResponse.ok) {
+    const transcript = await transcriptResponse.json().catch(() => ({}));
+    translatedText = transcript?.json?.utterances
+      ?.map(utterance => utterance.text)
+      .filter(Boolean)
+      .join(' ')
+      .trim() || '';
+  }
+
+  return { audioBuffer, translatedText };
+}
+
+function friendlyError(error) {
+  if (error.status === 401) return 'ElevenLabs 密钥无效，请检查 Vercel 环境变量。';
+  if (error.status === 402 || error.status === 429) return 'ElevenLabs 额度不足或请求过于频繁，请检查套餐额度。';
+  if (error.status === 403) return '当前 ElevenLabs 套餐没有语音克隆或多语言配音权限。';
+  if (error.status === 504) return error.message;
+  return error.message || '语音服务暂时不可用，请稍后重试。';
 }
 
 export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  setCors(res);
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(204).end();
   }
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
+  if (!apiKey) {
+    return res.status(503).json({
+      error: 'AI voice service not configured',
+      message: '真实爸爸音色服务尚未配置，当前只能使用浏览器体验模式。',
+      fallback: true
+    });
+  }
+
+  const body = parseBody(req.body);
+  if (!body) {
+    return res.status(400).json({ error: '请求内容不是有效的 JSON' });
+  }
+
+  let input;
   try {
-    // Check if API key is configured
-    if (!ELEVENLABS_API_KEY) {
-      return res.status(503).json({
-        error: 'AI voice service not configured',
-        message: '当前未配置 AI 语音服务，无法进行真实声纹克隆。',
-        fallback: true
+    input = validateGenerationInput(body);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  try {
+    if (input.language === 'zh') {
+      const audioBuffer = await createChineseSpeech({ ...input, apiKey });
+      return res.status(200).json({
+        status: 'success',
+        language: 'zh',
+        text: input.text,
+        audio: `data:audio/mpeg;base64,${audioBuffer.toString('base64')}`
       });
     }
 
-    const { text, language = 'zh', voiceId } = req.body;
-
-    if (!text || !voiceId) {
-      return res.status(400).json({ error: 'text and voiceId are required' });
-    }
-
-    if (!LANGUAGE_CODES[language]) {
-      return res.status(400).json({ error: 'Unsupported language' });
-    }
-
-    // Translate text to target language
-    const translatedText = await translateText(text, language);
-
-    // Generate audio using ElevenLabs Text-to-Speech
-    const ttsResponse = await fetch(
-      `${ELEVENLABS_API_URL}/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'xi-api-key': ELEVENLABS_API_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          text: translatedText,
-          model_id: 'eleven_monolingual_v1',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75
-          }
-        })
-      }
-    );
-
-    if (!ttsResponse.ok) {
-      const errorData = await ttsResponse.text();
-      console.error('ElevenLabs TTS error:', errorData);
-      return res.status(ttsResponse.status).json({
-        error: 'Failed to generate audio',
-        details: errorData
-      });
-    }
-
-    // Get audio buffer
-    const audioBuffer = await ttsResponse.buffer();
-    const audioBase64 = audioBuffer.toString('base64');
-
-    // Calculate approximate duration (roughly 0.1 seconds per character)
-    const estimatedDuration = Math.ceil(translatedText.length * 0.1);
+    const sourceBuffer = parseSourceAudio(body.sourceAudio);
+    const dubbingId = await createDub({
+      sourceBuffer,
+      targetLanguage: input.language,
+      apiKey
+    });
+    await waitForDub({ dubbingId, apiKey });
+    const result = await fetchDubResult({ dubbingId, language: input.language, apiKey });
 
     return res.status(200).json({
       status: 'success',
-      audio: `data:audio/mpeg;base64,${audioBase64}`,
-      language: language,
-      duration: estimatedDuration,
-      text: translatedText,
-      message: `已生成${language}语音版本`
+      language: input.language,
+      text: result.translatedText,
+      audio: `data:audio/mpeg;base64,${result.audioBuffer.toString('base64')}`
     });
   } catch (error) {
-    console.error('Error generating audio:', error);
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: error.message
+    console.error('generate-audio failed:', error.status, error.message, error.details || '');
+    return res.status(error.status && error.status >= 400 && error.status < 600 ? error.status : 502).json({
+      error: 'AUDIO_GENERATION_FAILED',
+      message: friendlyError(error)
     });
   }
 }

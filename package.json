@@ -1,14 +1,16 @@
 {
   "name": "papavoice-ai",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "mkdir -p public && cp -R papavoice public/papavoice && cp -f index.html README.md manifest.json service-worker.js styles.css script.js public/ 2>/dev/null || true",
+    "build": "rm -rf public && mkdir -p public && cp -R papavoice public/papavoice && cp index.html public/index.html",
+    "check": "node --check papavoice/app.js && node --check api/status.js && node --check api/create-voice.js && node --check api/generate-audio.js",
+    "test": "node --test",
     "dev": "vercel dev"
   },
   "dependencies": {
-    "form-data": "^4.0.0",
+    "form-data": "^4.0.4",
     "node-fetch": "^3.3.2"
   },
   "engines": {

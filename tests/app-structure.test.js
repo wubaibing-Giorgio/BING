@@ -23,7 +23,7 @@ test('page loads one application script and no conflicting legacy scripts', asyn
   const html = await readFile(new URL('papavoice/index.html', root), 'utf8');
   const sources = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]);
 
-  assert.deepEqual(sources, ['./app.js?v=2.0.0']);
+  assert.deepEqual(sources, ['./app.js?v=2.0.1']);
   assert.doesNotMatch(html, /ai-voice-handler\.js|\.\/script\.js/);
 });
 

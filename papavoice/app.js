@@ -31,6 +31,27 @@ const PRESETS = {
   }
 };
 
+const STORIES = {
+  'moon-postman': {
+    zh: '《北欧·小月亮的银色邮差》\n很久以前，在靠近北极光的小镇上，住着一只名叫诺诺的雪兔。每到夜晚，它就背起银色邮包，把月亮写的“晚安”送给还没睡着的孩子。第一封送给海边的小海豹，第二封送给松林里的小鹿，最后一封却没有名字。诺诺抬头问月亮：“这封给谁呢？”月亮笑着说：“给正在听故事的宝宝。”诺诺轻轻打开信，里面只有一句话：今天已经很好了，现在可以安心休息。窗外的风变得很轻，北极光像柔软的被子铺满天空。诺诺也蜷进雪窝里，听着爸爸的声音，慢慢进入甜甜的梦乡。'
+  },
+  'singing-boat': {
+    zh: '《意大利·会唱歌的小船》\n在威尼斯弯弯的水巷里，住着一只蓝色小船，名字叫波波。白天，它听见大船唱歌、鸽子拍翅，却觉得自己没有好听的声音。一天夜里，城市安静下来，波波载着一只困倦的小猫回家。它轻轻划过水面，船边响起“哗啦、哗啦”的节拍，桥洞送来柔柔的回声。小猫闭上眼睛说：“这就是我听过最安心的歌。”波波这才明白，歌声不一定要响亮；只要温柔地陪伴，也能让人感到幸福。从此，每当月亮升起，波波就慢慢划过水巷，为两岸的窗户唱一首轻轻的摇篮曲。听着水波的人们，很快都进入了甜甜的梦乡。'
+  },
+  'cloud-bakery': {
+    zh: '《法国·云朵面包店》\n巴黎屋顶最高的烟囱旁，有一家只在夜里开门的云朵面包店。店主是小狐狸露露，她把白云揉成面团，用月光烤成松软的月牙面包。一天，一颗小星星因为赶路太久，累得不再发亮。露露递给它一块刚出炉的面包，又倒了一杯温暖的银河牛奶。小星星吃完，身上慢慢亮起柔和的光。它没有急着飞走，而是帮露露把面包送到每一个做梦的窗口。孩子们闻到香味，翻个身，嘴角露出微笑。天快亮时，露露关上店门，对最后一颗星星说：“好好休息，明晚再见。”整座城市也在淡淡的面包香里安静睡着了。'
+  },
+  'lighthouse-hedgehog': {
+    zh: '《英国·守灯的小刺猬》\n在英国海边的绿色山坡上，住着一只小刺猬阿栗。它每天晚上都帮爷爷点亮灯塔。一天，浓雾盖住海面，一只晚归的小帆船找不到港口。阿栗有点害怕，却还是抱着小灯爬上旋转楼梯。风把灯吹灭一次，它就重新点亮一次。终于，温暖的光穿过雾气，在海上画出一条金色的路。小帆船顺着光安全回家，船上的人向灯塔轻轻挥手。爷爷摸摸阿栗的头说：“勇敢不是从不害怕，而是害怕时仍愿意照亮别人。”夜深了，海浪慢慢拍岸，灯塔一圈一圈地守护着海面，阿栗靠在爷爷身边，安心地睡着了。'
+  },
+  'little-elephant-rain': {
+    zh: '《印度·小象和第一滴雨》\n炎热的夏天，印度森林里的小河变得很浅，花园里的茉莉花都低下了头。小象米拉每天抬头等雨。终于，一朵深蓝色的云飘来，第一滴雨正好落进她的小鼻子里。米拉舍不得自己喝，便小心地走到花园，把雨滴轻轻送给最小的花苗。花苗抬起头，散发出淡淡的香气。接着，第二滴、第三滴雨落下来，森林很快响起快乐的沙沙声。孔雀展开尾巴，青蛙唱起歌，大家都来感谢米拉。米拉笑着说：“我只分享了一滴雨。”老榕树回答：“一滴温柔，会带来一整片清凉。”雨声越来越轻，米拉躺在妈妈身边，听着叶子上的水滴，安稳地睡着了。'
+  },
+  'firefly-train': {
+    zh: '《日本·萤火虫晚班车》\n在一片安静的荷塘边，每晚都有一列萤火虫晚班车。车厢是透明的露珠，车灯是温柔的绿色微光。一天，一颗小露珠从荷叶上滚下来，迷失在高高的草丛里。列车长小萤停下车，问它想去哪里。小露珠小声说：“我想回到妈妈身边。”于是，萤火虫们排成一条闪亮的路，列车穿过竹林，绕过石桥，终于来到那片圆圆的荷叶。露珠妈妈正焦急地等待，看到孩子便开心地抱住它。为了感谢大家，她把清晨最亮的一点光送给晚班车。天边微微发白，萤火虫们关掉车灯，钻进柔软的叶子下面休息。荷塘恢复安静，只剩一声轻轻的：“晚安，明天见。”'
+  }
+};
+
 const state = {
   mode: 'checking',
   mediaRecorder: null,
@@ -45,6 +66,7 @@ const state = {
   voiceId: '',
   voiceProfile: 'faithful',
   selectedPreset: 'goodnight',
+  selectedStory: '',
   generatedUrls: new Set(),
   isGenerating: false,
   toastTimer: null
@@ -81,7 +103,7 @@ function cacheElements() {
     'recording-meta', 'recording-preview', 'preview-audio', 'upload-button',
     'clone-status', 'step-message', 'voice-ready', 'voice-ready-text',
     'reset-voice-button', 'voice-profile-row', 'voice-profile-help',
-    'preset-row', 'message-input', 'char-count',
+    'preset-row', 'story-shelf', 'message-input', 'char-count',
     'generate-note', 'generate-button', 'step-results', 'generation-status',
     'results-grid', 'toast'
   ];
@@ -104,6 +126,11 @@ function bindEvents() {
   elements.presetRow.addEventListener('click', event => {
     const button = event.target.closest('[data-preset]');
     if (button) selectPreset(button.dataset.preset);
+  });
+
+  elements.storyShelf.addEventListener('click', event => {
+    const button = event.target.closest('[data-story]');
+    if (button) selectStory(button.dataset.story);
   });
 
   elements.voiceProfileRow.addEventListener('click', event => {
@@ -434,18 +461,44 @@ function selectPreset(presetId) {
   const preset = PRESETS[presetId];
   if (!preset) return;
   state.selectedPreset = presetId;
+  state.selectedStory = '';
   elements.presetRow.querySelectorAll('[data-preset]').forEach(button => {
     button.classList.toggle('is-selected', button.dataset.preset === presetId);
   });
+  updateStorySelection();
   elements.messageInput.value = preset.zh;
   updateCharCount();
 }
 
+function selectStory(storyId) {
+  const story = STORIES[storyId];
+  if (!story) return;
+  state.selectedStory = storyId;
+  state.selectedPreset = '';
+  elements.presetRow.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('is-selected'));
+  updateStorySelection();
+  elements.messageInput.value = story.zh;
+  updateCharCount();
+  elements.messageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function updateStorySelection() {
+  elements.storyShelf.querySelectorAll('[data-story]').forEach(button => {
+    const selected = button.dataset.story === state.selectedStory;
+    button.classList.toggle('is-selected', selected);
+    button.setAttribute('aria-pressed', String(selected));
+    const action = button.querySelector('.story-action');
+    if (action) action.textContent = selected ? '已选中，点击可再次载入' : '使用这个故事';
+  });
+}
+
 function handleMessageInput() {
-  const selectedText = PRESETS[state.selectedPreset]?.zh;
-  if (elements.messageInput.value !== selectedText) {
+  const selectedText = PRESETS[state.selectedPreset]?.zh || STORIES[state.selectedStory]?.zh || '';
+  if (!selectedText || elements.messageInput.value !== selectedText) {
     state.selectedPreset = '';
+    state.selectedStory = '';
     elements.presetRow.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('is-selected'));
+    updateStorySelection();
   }
   updateCharCount();
 }
@@ -559,8 +612,17 @@ async function generateRealResults(text) {
 
 function generateDemoResults(text) {
   const preset = Object.values(PRESETS).find(item => item.zh === text);
+  const story = Object.values(STORIES).find(item => item.zh === text);
+  if (story) {
+    renderDemoResult('zh', story.zh);
+    for (const language of ['en', 'it', 'fr']) {
+      renderErrorResult(language, '连接真实爸爸音色服务后，可自动翻译并生成这个故事的外语版。');
+    }
+    elements.generationStatus.textContent = '中文体验故事已准备好；外语版需要连接真实爸爸音色服务。';
+    return;
+  }
   if (!preset) {
-    elements.generationStatus.textContent = '体验模式只支持上方三段现成文案。请选择一段模板后再生成；真实模式支持任意中文。';
+    elements.generationStatus.textContent = '体验模式支持内置短文和故事；真实模式支持任意中文。';
     for (const language of Object.keys(LANGUAGES)) {
       renderErrorResult(language, '请选择内置文案，或配置真实 AI 服务。');
     }

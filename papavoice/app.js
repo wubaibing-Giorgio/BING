@@ -123,14 +123,15 @@ async function checkServiceStatus() {
     const data = await response.json();
     setServiceMode(
       response.ok && data.configured ? 'ai' : 'demo',
-      data.providerReachable !== false
+      data.providerReachable !== false,
+      data.providerStatus
     );
   } catch {
-    setServiceMode('demo');
+    setServiceMode('demo', false, 'status-unreachable');
   }
 }
 
-function setServiceMode(mode, providerReachable = true) {
+function setServiceMode(mode, providerReachable = true, providerStatus = '') {
   state.mode = mode;
   elements.servicePill.dataset.mode = mode;
   elements.modeBanner.dataset.mode = mode;
@@ -142,9 +143,32 @@ function setServiceMode(mode, providerReachable = true) {
       ? '真实爸爸音色服务已连接。录音只会在你确认并点击“建立爸爸专属音色”后上传。'
       : '爸爸音色密钥已配置，但语音服务连接暂时不稳定；可以继续尝试，失败时会保留录音。';
   } else {
-    elements.servicePillText.textContent = '体验模式';
-    elements.modeBanner.querySelector('.mode-icon').textContent = 'i';
-    elements.modeBannerText.textContent = '当前为体验模式：四国语音使用手机自带音色，并不是爸爸的音色。配置 ElevenLabs 后会自动切换为真实模式。';
+    const statusMessages = {
+      'invalid-key': {
+        pill: '密钥需更新',
+        icon: '!',
+        text: 'ElevenLabs 密钥无效或已失效。请在 Vercel 环境变量 ELEVENLABS_API_KEY 中换成有效密钥并重新部署。'
+      },
+      'missing-permission': {
+        pill: '权限需开启',
+        icon: '!',
+        text: 'ElevenLabs 密钥缺少所需权限。请为密钥开启语音克隆和语音生成权限，然后重新部署。'
+      },
+      'status-unreachable': {
+        pill: '服务待连接',
+        icon: '!',
+        text: '暂时无法确认爸爸音色服务状态。可以稍后刷新；已录好的声音不会因此被删除。'
+      }
+    };
+    const message = statusMessages[providerStatus] || {
+      pill: '体验模式',
+      icon: 'i',
+      text: '当前为体验模式：四国语音使用手机自带音色，并不是爸爸的音色。配置 ElevenLabs 后会自动切换为真实模式。'
+    };
+
+    elements.servicePillText.textContent = message.pill;
+    elements.modeBanner.querySelector('.mode-icon').textContent = message.icon;
+    elements.modeBannerText.textContent = message.text;
   }
 
   updateUploadButton();

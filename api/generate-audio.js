@@ -7,12 +7,24 @@ const MAX_SOURCE_AUDIO_BYTES = 4 * 1024 * 1024;
 const DUB_POLL_INTERVAL_MS = 2500;
 const DUB_TIMEOUT_MS = 90_000;
 
-export const VOICE_SETTINGS = Object.freeze({
-  stability: 0.5,
-  similarity_boost: 0.92,
-  style: 0,
-  use_speaker_boost: true
+export const VOICE_PROFILES = Object.freeze({
+  faithful: Object.freeze({
+    stability: 0.42,
+    similarity_boost: 0.98,
+    style: 0,
+    use_speaker_boost: true,
+    speed: 0.96
+  }),
+  natural: Object.freeze({
+    stability: 0.5,
+    similarity_boost: 0.9,
+    style: 0,
+    use_speaker_boost: true,
+    speed: 0.98
+  })
 });
+
+export const VOICE_SETTINGS = VOICE_PROFILES.faithful;
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,13 +48,15 @@ export function validateGenerationInput(body) {
   const text = String(body?.text || '').trim();
   const language = String(body?.language || 'zh').toLowerCase();
   const voiceId = String(body?.voiceId || '').trim();
+  const voiceProfile = String(body?.voiceProfile || 'faithful').toLowerCase();
 
   if (!text) throw new Error('请输入想对宝宝说的话');
   if (text.length > MAX_TEXT_LENGTH) throw new Error(`文案不能超过 ${MAX_TEXT_LENGTH} 个字`);
   if (!SUPPORTED_LANGUAGES.has(language)) throw new Error('不支持这个语言');
   if (!/^[A-Za-z0-9_-]{5,100}$/.test(voiceId)) throw new Error('爸爸音色 ID 无效，请重新录制');
+  if (!Object.hasOwn(VOICE_PROFILES, voiceProfile)) throw new Error('不支持这个音色还原方式');
 
-  return { text, language, voiceId };
+  return { text, language, voiceId, voiceProfile };
 }
 
 function parseSourceAudio(sourceAudio) {
@@ -63,7 +77,7 @@ function parseSourceAudio(sourceAudio) {
   return buffer;
 }
 
-async function createChineseSpeech({ text, voiceId, apiKey }) {
+async function createChineseSpeech({ text, voiceId, voiceProfile, apiKey }) {
   const response = await fetch(
     `${ELEVENLABS_API_URL}/text-to-speech/${encodeURIComponent(voiceId)}?output_format=mp3_44100_128`,
     {
@@ -76,7 +90,7 @@ async function createChineseSpeech({ text, voiceId, apiKey }) {
       body: JSON.stringify({
         text,
         model_id: 'eleven_multilingual_v2',
-        voice_settings: VOICE_SETTINGS
+        voice_settings: VOICE_PROFILES[voiceProfile]
       })
     }
   );
@@ -224,6 +238,7 @@ export default async function handler(req, res) {
         status: 'success',
         language: 'zh',
         text: input.text,
+        voiceProfile: input.voiceProfile,
         audio: `data:audio/mpeg;base64,${audioBuffer.toString('base64')}`
       });
     }

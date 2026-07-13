@@ -374,12 +374,12 @@
             <div class="card-kicker">STEP 01</div>
             <h3 id="record-title">录入爸爸声音</h3>
           </div>
-          <span class="card-badge">建议 60–120 秒</span>
+          <span class="card-badge">建议 90–120 秒</span>
         </div>
-        <p class="helper">找一个安静、没有回声的房间，手机距离嘴巴约 20 厘米。只录爸爸一人，用平时最自然的语速和音量连续说话，至少录满 60 秒。</p>
+        <p class="helper">找一个安静、没有回声的房间，手机距离嘴巴约 20 厘米。只录爸爸一人，用平时说话的声音连续录满 90 秒；不要耳语、不要刻意播音。如果控制中心显示“麦克风模式”，请选择“标准”。</p>
 
         <div class="reading-script">
-          <strong>可以照着读（请自然说完）：</strong><br />亲爱的宝宝，我是爸爸。现在我在一个安静的房间里，用平时最自然的语气和你说话。今天外面的阳光很好，风也很轻。我想告诉你，我们每天都在期待你的到来。以后我会陪你散步，给你讲故事，听你分享开心和难过。你不用着急，慢慢长大就好。无论什么时候，爸爸妈妈都会在你身边，给你温暖，也给你勇气。希望你健康、平安、快乐，带着好奇心认识这个世界。亲爱的宝宝，爸爸很爱你，我们很快就会见面了。
+          <strong>可以照着读（请用日常语气完整读完）：</strong><br />亲爱的宝宝，我是爸爸。现在我在一个安静的房间里，用平时和家人聊天的声音对你说话。今天外面的阳光很好，风也很轻，树叶在窗外慢慢摇动。爸爸想告诉你，我们每天都在期待你的到来，也常常想象第一次见到你的样子。以后我会陪你散步，给你讲故事，带你看清晨的天空和傍晚的晚霞。我会听你分享开心的事情，也会在你难过的时候陪着你。你不用着急，按照自己的节奏慢慢长大就好。这个世界有春天的花、夏天的雨、秋天的风，还有冬天温暖的灯光，爸爸都想陪你一起感受。无论什么时候，爸爸妈妈都会站在你身边，给你温暖，也给你勇气。希望你健康、平安、快乐，带着好奇心认识身边的人和事。等你长大一点，我们可以一起读书、旅行、做饭，也可以什么都不做，只是安静地坐在一起说说话。亲爱的宝宝，爸爸很爱你。你听到的就是爸爸平时的声音，我们很快就会见面了。
         </div>
 
         <label class="consent">
@@ -418,6 +418,13 @@
           <button id="reset-voice-button" class="button button-ghost" type="button">重新录入</button>
         </div>
 
+        <p class="helper" style="margin-bottom:8px">选择音色还原方式：</p>
+        <div id="voice-profile-row" class="preset-row" aria-label="音色还原方式">
+          <button class="preset is-selected" type="button" data-voice-profile="faithful">更像本人</button>
+          <button class="preset" type="button" data-voice-profile="natural">更自然</button>
+        </div>
+        <p id="voice-profile-help" class="generate-note">优先贴近爸爸本人声纹；建议首次生成先选这一档。</p>
+
         <p class="helper">可以选一段现成文案，也可以直接写自己的内容。正式模式支持任意中文文案。</p>
         <div id="preset-row" class="preset-row" aria-label="胎教文案模板">
           <button class="preset is-selected" type="button" data-preset="goodnight">晚安陪伴</button>
@@ -451,6 +458,6 @@
   </div>
 
   <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
-  <script src="./app.js?v=2.1.0" defer></script>
+  <script src="./app.js?v=2.2.0" defer></script>
 </body>
 </html>

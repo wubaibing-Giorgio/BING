@@ -1,6 +1,7 @@
 const API_BASE = (document.querySelector('meta[name="papavoice-api-base"]')?.content || '/api').replace(/\/$/, '');
-const MIN_RECORD_SECONDS = 15;
-const MAX_RECORD_SECONDS = 60;
+const MIN_RECORD_SECONDS = 60;
+const MAX_RECORD_SECONDS = 120;
+const VOICE_PROFILE_VERSION = '2';
 
 const LANGUAGES = {
   zh: { label: '中文', flag: '🇨🇳', locale: 'zh-CN' },
@@ -178,10 +179,14 @@ function setServiceMode(mode, providerReachable = true, providerStatus = '') {
 function restoreSavedVoice() {
   try {
     const savedVoiceId = localStorage.getItem('papavoice.voiceId') || '';
-    if (/^[A-Za-z0-9_-]{5,100}$/.test(savedVoiceId)) {
+    const savedProfileVersion = localStorage.getItem('papavoice.voiceProfileVersion') || '';
+    if (/^[A-Za-z0-9_-]{5,100}$/.test(savedVoiceId) && savedProfileVersion === VOICE_PROFILE_VERSION) {
       state.voiceId = savedVoiceId;
       unlockMessageStep();
       updateProgress(3);
+    } else if (savedVoiceId) {
+      localStorage.removeItem('papavoice.voiceId');
+      localStorage.removeItem('papavoice.voiceProfileVersion');
     }
   } catch {
     // Storage can be unavailable in private browsing; the current session still works.
@@ -373,7 +378,10 @@ async function createVoiceClone() {
     const data = await uploadVoiceRecording();
 
     state.voiceId = data.voiceId;
-    try { localStorage.setItem('papavoice.voiceId', state.voiceId); } catch { /* session-only */ }
+    try {
+      localStorage.setItem('papavoice.voiceId', state.voiceId);
+      localStorage.setItem('papavoice.voiceProfileVersion', VOICE_PROFILE_VERSION);
+    } catch { /* session-only */ }
     elements.cloneStatus.className = 'status is-success';
     elements.cloneStatus.textContent = '✓ 爸爸专属音色已建立成功。';
     unlockMessageStep();
@@ -400,7 +408,10 @@ function unlockMessageStep() {
 function resetVoice() {
   if (state.isGenerating) return;
   state.voiceId = '';
-  try { localStorage.removeItem('papavoice.voiceId'); } catch { /* ignore */ }
+  try {
+    localStorage.removeItem('papavoice.voiceId');
+    localStorage.removeItem('papavoice.voiceProfileVersion');
+  } catch { /* ignore */ }
   clearRecording();
   clearGeneratedResults();
   elements.voiceReady.hidden = true;

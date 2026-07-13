@@ -33,9 +33,9 @@ test('generation accepts exactly the four required languages', () => {
 
 test('voice settings retain the preferred natural PapaVoice tuning', () => {
   assert.deepEqual(VOICE_SETTINGS, {
-    stability: 0.35,
-    similarity_boost: 0.85,
-    style: 0.4,
+    stability: 0.5,
+    similarity_boost: 0.92,
+    style: 0,
     use_speaker_boost: true
   });
 });
@@ -100,7 +100,7 @@ test('create voice accepts a raw Safari audio upload', async () => {
     headers: {
       'content-type': 'audio/mp4',
       'x-papavoice-mime-type': 'audio/mp4',
-      'x-papavoice-duration': '17',
+      'x-papavoice-duration': '65',
       'x-papavoice-request-id': 'safari-upload-test'
     },
     body: Buffer.from('fake-aac-audio')

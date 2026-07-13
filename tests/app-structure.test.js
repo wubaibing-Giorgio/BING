@@ -23,8 +23,16 @@ test('page loads one application script and no conflicting legacy scripts', asyn
   const html = await readFile(new URL('papavoice/index.html', root), 'utf8');
   const sources = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]);
 
-  assert.deepEqual(sources, ['./app.js?v=2.0.1']);
+  assert.deepEqual(sources, ['./app.js?v=2.0.2']);
   assert.doesNotMatch(html, /ai-voice-handler\.js|\.\/script\.js/);
+});
+
+test('provider configuration problems have actionable mobile messages', async () => {
+  const script = await readFile(new URL('papavoice/app.js', root), 'utf8');
+
+  assert.match(script, /invalid-key[\s\S]*密钥需更新/);
+  assert.match(script, /missing-permission[\s\S]*权限需开启/);
+  assert.match(script, /ELEVENLABS_API_KEY/);
 });
 
 test('root redirect remains relative for both Vercel and GitHub Pages', async () => {

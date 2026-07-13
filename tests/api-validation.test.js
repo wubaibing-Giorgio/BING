@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import createStatus from '../api/status.js';
 import createVoice, { parseAudioPayload } from '../api/create-voice.js';
-import { validateGenerationInput, VOICE_SETTINGS } from '../api/generate-audio.js';
+import { validateGenerationInput, VOICE_PROFILES, VOICE_SETTINGS } from '../api/generate-audio.js';
 
 test('recording parser preserves the actual iPhone-compatible mime type', () => {
   const payload = `data:audio/mp4;base64,${Buffer.from('sample-audio').toString('base64')}`;
@@ -33,11 +33,19 @@ test('generation accepts exactly the four required languages', () => {
 
 test('voice settings retain the preferred natural PapaVoice tuning', () => {
   assert.deepEqual(VOICE_SETTINGS, {
-    stability: 0.5,
-    similarity_boost: 0.92,
+    stability: 0.42,
+    similarity_boost: 0.98,
     style: 0,
-    use_speaker_boost: true
+    use_speaker_boost: true,
+    speed: 0.96
   });
+  assert.equal(VOICE_PROFILES.natural.similarity_boost, 0.9);
+  assert.equal(validateGenerationInput({
+    text: '亲爱的宝宝',
+    language: 'zh',
+    voiceId: 'voice_12345',
+    voiceProfile: 'natural'
+  }).voiceProfile, 'natural');
 });
 
 test('status endpoint reports configuration without exposing the key', async () => {
@@ -100,7 +108,7 @@ test('create voice accepts a raw Safari audio upload', async () => {
     headers: {
       'content-type': 'audio/mp4',
       'x-papavoice-mime-type': 'audio/mp4',
-      'x-papavoice-duration': '65',
+      'x-papavoice-duration': '95',
       'x-papavoice-request-id': 'safari-upload-test'
     },
     body: Buffer.from('fake-aac-audio')

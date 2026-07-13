@@ -1,7 +1,7 @@
 const API_BASE = (document.querySelector('meta[name="papavoice-api-base"]')?.content || '/api').replace(/\/$/, '');
-const MIN_RECORD_SECONDS = 60;
+const MIN_RECORD_SECONDS = 90;
 const MAX_RECORD_SECONDS = 120;
-const VOICE_PROFILE_VERSION = '2';
+const VOICE_PROFILE_VERSION = '3';
 
 const LANGUAGES = {
   zh: { label: '中文', flag: '🇨🇳', locale: 'zh-CN' },
@@ -43,6 +43,7 @@ const state = {
   recordingDuration: 0,
   timerId: null,
   voiceId: '',
+  voiceProfile: 'faithful',
   selectedPreset: 'goodnight',
   generatedUrls: new Set(),
   isGenerating: false,
@@ -67,6 +68,7 @@ function initialize() {
   cacheElements();
   bindEvents();
   selectPreset('goodnight');
+  selectVoiceProfile('faithful');
   restoreSavedVoice();
   checkServiceStatus();
   registerServiceWorker();
@@ -78,7 +80,8 @@ function cacheElements() {
     'voice-consent', 'record-button', 'stop-button', 'record-timer',
     'recording-meta', 'recording-preview', 'preview-audio', 'upload-button',
     'clone-status', 'step-message', 'voice-ready', 'voice-ready-text',
-    'reset-voice-button', 'preset-row', 'message-input', 'char-count',
+    'reset-voice-button', 'voice-profile-row', 'voice-profile-help',
+    'preset-row', 'message-input', 'char-count',
     'generate-note', 'generate-button', 'step-results', 'generation-status',
     'results-grid', 'toast'
   ];
@@ -101,6 +104,11 @@ function bindEvents() {
   elements.presetRow.addEventListener('click', event => {
     const button = event.target.closest('[data-preset]');
     if (button) selectPreset(button.dataset.preset);
+  });
+
+  elements.voiceProfileRow.addEventListener('click', event => {
+    const button = event.target.closest('[data-voice-profile]');
+    if (button) selectVoiceProfile(button.dataset.voiceProfile);
   });
 
   window.addEventListener('pagehide', stopMediaTracks);
@@ -211,7 +219,7 @@ async function startRecording() {
   try {
     state.mediaStream = await requestMicrophone();
     const mimeType = chooseRecordingMimeType();
-    const options = mimeType ? { mimeType, audioBitsPerSecond: 96_000 } : undefined;
+    const options = mimeType ? { mimeType, audioBitsPerSecond: 128_000 } : undefined;
     state.mediaRecorder = new MediaRecorder(state.mediaStream, options);
     state.recordingMimeType = state.mediaRecorder.mimeType || mimeType || 'audio/webm';
     state.chunks = [];
@@ -248,9 +256,9 @@ async function requestMicrophone() {
   try {
     return await navigator.mediaDevices.getUserMedia({
       audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
         channelCount: 1
       }
     });
@@ -442,6 +450,17 @@ function handleMessageInput() {
   updateCharCount();
 }
 
+function selectVoiceProfile(profileId) {
+  if (!['faithful', 'natural'].includes(profileId)) return;
+  state.voiceProfile = profileId;
+  elements.voiceProfileRow.querySelectorAll('[data-voice-profile]').forEach(button => {
+    button.classList.toggle('is-selected', button.dataset.voiceProfile === profileId);
+  });
+  elements.voiceProfileHelp.textContent = profileId === 'faithful'
+    ? '优先贴近爸爸本人声纹；建议首次生成先选这一档。'
+    : '适当放松声纹约束，语气更流畅，但可能没有“更像本人”那么接近。';
+}
+
 function updateCharCount() {
   elements.charCount.textContent = String(elements.messageInput.value.length);
 }
@@ -490,7 +509,12 @@ async function generateRealResults(text) {
   try {
     chineseResult = await requestJson(`${API_BASE}/generate-audio`, {
       method: 'POST',
-      body: JSON.stringify({ text, language: 'zh', voiceId: state.voiceId })
+      body: JSON.stringify({
+        text,
+        language: 'zh',
+        voiceId: state.voiceId,
+        voiceProfile: state.voiceProfile
+      })
     });
     renderAudioResult('zh', chineseResult);
   } catch (error) {
@@ -517,6 +541,7 @@ async function generateRealResults(text) {
           text,
           language,
           voiceId: state.voiceId,
+          voiceProfile: state.voiceProfile,
           sourceAudio: chineseResult.audio
         })
       });

@@ -23,7 +23,7 @@ test('page loads one application script and no conflicting legacy scripts', asyn
   const html = await readFile(new URL('papavoice/index.html', root), 'utf8');
   const sources = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]);
 
-  assert.deepEqual(sources, ['./app.js?v=2.1.0']);
+  assert.deepEqual(sources, ['./app.js?v=2.2.0']);
   assert.doesNotMatch(html, /ai-voice-handler\.js|\.\/script\.js/);
 });
 
@@ -41,10 +41,13 @@ test('voice identity workflow requires a full quality recording', async () => {
     readFile(new URL('papavoice/app.js', root), 'utf8')
   ]);
 
-  assert.match(script, /MIN_RECORD_SECONDS = 60/);
-  assert.match(script, /VOICE_PROFILE_VERSION = '2'/);
-  assert.match(html, /建议 60–120 秒/);
+  assert.match(script, /MIN_RECORD_SECONDS = 90/);
+  assert.match(script, /VOICE_PROFILE_VERSION = '3'/);
+  assert.match(script, /echoCancellation: false/);
+  assert.match(script, /audioBitsPerSecond: 128_000/);
+  assert.match(html, /建议 90–120 秒/);
   assert.match(html, /没有回声/);
+  assert.match(html, /data-voice-profile="faithful"/);
 });
 
 test('root redirect remains relative for both Vercel and GitHub Pages', async () => {

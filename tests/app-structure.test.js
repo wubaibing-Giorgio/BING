@@ -23,7 +23,7 @@ test('page loads one application script and no conflicting legacy scripts', asyn
   const html = await readFile(new URL('papavoice/index.html', root), 'utf8');
   const sources = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]);
 
-  assert.deepEqual(sources, ['./app.js?v=2.3.0']);
+  assert.deepEqual(sources, ['./app.js?v=2.4.0']);
   assert.doesNotMatch(html, /ai-voice-handler\.js|\.\/script\.js/);
 });
 
@@ -61,13 +61,29 @@ test('page includes a free international bedtime story shelf', async () => {
   assert.equal(new Set(storyButtons).size, 6);
   assert.match(html, /环球睡前故事/);
   assert.match(html, /6 篇免费/);
-  assert.match(html, /生成音频会使用你现有的语音服务额度/);
+  assert.match(html, /只有点击生成爸爸音色版本时/);
 
   for (const storyId of storyButtons) {
     assert.match(script, new RegExp(`'${storyId}'`));
   }
   assert.match(script, /function selectStory/);
   assert.match(script, /selectedStory/);
+});
+
+test('free story preview works before a father voice is created', async () => {
+  const [html, script] = await Promise.all([
+    readFile(new URL('papavoice/index.html', root), 'utf8'),
+    readFile(new URL('papavoice/app.js', root), 'utf8')
+  ]);
+
+  assert.match(html, /id="step-message"[^>]+data-state="active"/);
+  assert.match(html, /id="preview-story-button"/);
+  assert.match(html, /id="use-story-button"/);
+  assert.match(html, /不耗额度/);
+  assert.match(script, /function toggleStoryPreview/);
+  assert.match(script, /SpeechSynthesisUtterance/);
+  assert.match(script, /function stopStoryPreview/);
+  assert.match(script, /elements\.stepMessage\.dataset\.state = 'active'/);
 });
 
 test('root redirect remains relative for both Vercel and GitHub Pages', async () => {

@@ -8,9 +8,9 @@ const DUB_POLL_INTERVAL_MS = 2500;
 const DUB_TIMEOUT_MS = 90_000;
 
 export const VOICE_SETTINGS = Object.freeze({
-  stability: 0.35,
-  similarity_boost: 0.85,
-  style: 0.4,
+  stability: 0.5,
+  similarity_boost: 0.92,
+  style: 0,
   use_speaker_boost: true
 });
 

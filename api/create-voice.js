@@ -2,9 +2,9 @@ import { Blob } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
 
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1';
-const MAX_AUDIO_BYTES = 3 * 1024 * 1024;
-const MIN_DURATION_SECONDS = 10;
-const MAX_DURATION_SECONDS = 90;
+const MAX_AUDIO_BYTES = 6 * 1024 * 1024;
+const MIN_DURATION_SECONDS = 55;
+const MAX_DURATION_SECONDS = 150;
 const PROVIDER_TIMEOUT_MS = 55_000;
 
 const EXTENSIONS = {
@@ -63,7 +63,7 @@ function validateAudioBuffer(buffer, mimeType) {
     throw new Error('录音内容为空');
   }
   if (buffer.length > MAX_AUDIO_BYTES) {
-    throw new Error('录音文件过大，请控制在 60 秒以内并重新录制');
+    throw new Error('录音文件过大，请控制在 120 秒以内并重新录制');
   }
   return { buffer, mimeType, extension: EXTENSIONS[mimeType] };
 }
@@ -151,7 +151,7 @@ function friendlyProviderError(status, details) {
   if (status === 401) return 'ElevenLabs 密钥无效，请重新配置语音服务。';
   if (status === 403) return '当前 ElevenLabs 密钥没有创建音色的权限，请检查 API Key 权限或套餐。';
   if (status === 402 || status === 429) return 'ElevenLabs 额度不足或请求过于频繁，请检查套餐额度。';
-  if (status === 422) return '这段录音暂时无法建立音色，请在安静环境重新录制 30–60 秒。';
+  if (status === 422) return '这段录音暂时无法建立音色，请在安静环境重新录制 60–120 秒。';
   return detailMessage(details) || '建立爸爸音色失败，请稍后重试。';
 }
 

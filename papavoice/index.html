@@ -310,6 +310,13 @@
     .story-summary { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.55; }
     .story-action { display: block; margin-top: 11px; color: var(--cocoa-dark); font-size: 11px; font-weight: 800; }
     .story-card.is-selected .story-action::before { content: "✓ "; color: var(--sage); }
+    .story-preview-panel { margin: 3px 0 11px; padding: 13px; border: 1px solid #d7e2d5; border-radius: 17px; background: #f3f8f2; }
+    .story-preview-copy { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .story-preview-title { display: block; color: #4f6652; font-size: 12px; }
+    .story-preview-status { display: block; margin-top: 4px; color: #748476; font-size: 10px; line-height: 1.45; }
+    .no-credit-pill { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; color: #567059; background: #dfeade; font-size: 10px; font-weight: 800; }
+    .story-preview-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }
+    .story-preview-actions .button { min-height: 42px; padding: 9px 10px; border-radius: 13px; font-size: 11px; }
     .story-note { margin: 1px 1px 12px; color: #897b73; font-size: 10px; line-height: 1.55; }
 
     .textarea-wrap { position: relative; margin-top: 8px; }
@@ -453,13 +460,13 @@
         <div id="clone-status" class="status" role="status" aria-live="polite"></div>
       </section>
 
-      <section id="step-message" class="card" data-state="locked" aria-labelledby="message-title">
+      <section id="step-message" class="card" data-state="active" aria-labelledby="message-title">
         <div class="card-head">
           <div>
             <div class="card-kicker">STEP 02</div>
             <h3 id="message-title">写下想对宝宝说的话</h3>
           </div>
-          <span class="card-badge">最多 500 字</span>
+          <span class="card-badge">故事可免费试听</span>
         </div>
 
         <div id="voice-ready" class="voice-ready" hidden>
@@ -526,7 +533,20 @@
             <span class="story-action">使用这个故事</span>
           </button>
         </div>
-        <p class="story-note">故事为 PapaVoice 原创内容，可免费选用；生成音频会使用你现有的语音服务额度。</p>
+        <div class="story-preview-panel" aria-live="polite">
+          <div class="story-preview-copy">
+            <div>
+              <strong id="free-preview-title" class="story-preview-title">先选择一个故事</strong>
+              <span id="free-preview-status" class="story-preview-status">可用手机系统声音免费试听，不需要先录音。</span>
+            </div>
+            <span class="no-credit-pill">不耗额度</span>
+          </div>
+          <div class="story-preview-actions">
+            <button id="preview-story-button" class="button button-secondary" type="button" disabled>▶ 免费试听</button>
+            <button id="use-story-button" class="button button-primary" type="button" disabled>用爸爸声音制作</button>
+          </div>
+        </div>
+        <p class="story-note">故事为 PapaVoice 原创内容，可免费选用和系统音色试听；只有点击生成爸爸音色版本时，才会使用你现有的语音服务额度。</p>
         <div class="textarea-wrap">
           <textarea id="message-input" maxlength="500" placeholder="亲爱的宝宝，爸爸想对你说……"></textarea>
           <span class="char-count"><span id="char-count">0</span>/500</span>
@@ -554,6 +574,6 @@
   </div>
 
   <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
-  <script src="./app.js?v=2.3.0" defer></script>
+  <script src="./app.js?v=2.4.0" defer></script>
 </body>
 </html>

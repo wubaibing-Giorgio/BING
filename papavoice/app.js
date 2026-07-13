@@ -33,21 +33,27 @@ const PRESETS = {
 
 const STORIES = {
   'moon-postman': {
+    title: '小月亮的银色邮差',
     zh: '《北欧·小月亮的银色邮差》\n很久以前，在靠近北极光的小镇上，住着一只名叫诺诺的雪兔。每到夜晚，它就背起银色邮包，把月亮写的“晚安”送给还没睡着的孩子。第一封送给海边的小海豹，第二封送给松林里的小鹿，最后一封却没有名字。诺诺抬头问月亮：“这封给谁呢？”月亮笑着说：“给正在听故事的宝宝。”诺诺轻轻打开信，里面只有一句话：今天已经很好了，现在可以安心休息。窗外的风变得很轻，北极光像柔软的被子铺满天空。诺诺也蜷进雪窝里，听着爸爸的声音，慢慢进入甜甜的梦乡。'
   },
   'singing-boat': {
+    title: '会唱歌的小船',
     zh: '《意大利·会唱歌的小船》\n在威尼斯弯弯的水巷里，住着一只蓝色小船，名字叫波波。白天，它听见大船唱歌、鸽子拍翅，却觉得自己没有好听的声音。一天夜里，城市安静下来，波波载着一只困倦的小猫回家。它轻轻划过水面，船边响起“哗啦、哗啦”的节拍，桥洞送来柔柔的回声。小猫闭上眼睛说：“这就是我听过最安心的歌。”波波这才明白，歌声不一定要响亮；只要温柔地陪伴，也能让人感到幸福。从此，每当月亮升起，波波就慢慢划过水巷，为两岸的窗户唱一首轻轻的摇篮曲。听着水波的人们，很快都进入了甜甜的梦乡。'
   },
   'cloud-bakery': {
+    title: '云朵面包店',
     zh: '《法国·云朵面包店》\n巴黎屋顶最高的烟囱旁，有一家只在夜里开门的云朵面包店。店主是小狐狸露露，她把白云揉成面团，用月光烤成松软的月牙面包。一天，一颗小星星因为赶路太久，累得不再发亮。露露递给它一块刚出炉的面包，又倒了一杯温暖的银河牛奶。小星星吃完，身上慢慢亮起柔和的光。它没有急着飞走，而是帮露露把面包送到每一个做梦的窗口。孩子们闻到香味，翻个身，嘴角露出微笑。天快亮时，露露关上店门，对最后一颗星星说：“好好休息，明晚再见。”整座城市也在淡淡的面包香里安静睡着了。'
   },
   'lighthouse-hedgehog': {
+    title: '守灯的小刺猬',
     zh: '《英国·守灯的小刺猬》\n在英国海边的绿色山坡上，住着一只小刺猬阿栗。它每天晚上都帮爷爷点亮灯塔。一天，浓雾盖住海面，一只晚归的小帆船找不到港口。阿栗有点害怕，却还是抱着小灯爬上旋转楼梯。风把灯吹灭一次，它就重新点亮一次。终于，温暖的光穿过雾气，在海上画出一条金色的路。小帆船顺着光安全回家，船上的人向灯塔轻轻挥手。爷爷摸摸阿栗的头说：“勇敢不是从不害怕，而是害怕时仍愿意照亮别人。”夜深了，海浪慢慢拍岸，灯塔一圈一圈地守护着海面，阿栗靠在爷爷身边，安心地睡着了。'
   },
   'little-elephant-rain': {
+    title: '小象和第一滴雨',
     zh: '《印度·小象和第一滴雨》\n炎热的夏天，印度森林里的小河变得很浅，花园里的茉莉花都低下了头。小象米拉每天抬头等雨。终于，一朵深蓝色的云飘来，第一滴雨正好落进她的小鼻子里。米拉舍不得自己喝，便小心地走到花园，把雨滴轻轻送给最小的花苗。花苗抬起头，散发出淡淡的香气。接着，第二滴、第三滴雨落下来，森林很快响起快乐的沙沙声。孔雀展开尾巴，青蛙唱起歌，大家都来感谢米拉。米拉笑着说：“我只分享了一滴雨。”老榕树回答：“一滴温柔，会带来一整片清凉。”雨声越来越轻，米拉躺在妈妈身边，听着叶子上的水滴，安稳地睡着了。'
   },
   'firefly-train': {
+    title: '萤火虫晚班车',
     zh: '《日本·萤火虫晚班车》\n在一片安静的荷塘边，每晚都有一列萤火虫晚班车。车厢是透明的露珠，车灯是温柔的绿色微光。一天，一颗小露珠从荷叶上滚下来，迷失在高高的草丛里。列车长小萤停下车，问它想去哪里。小露珠小声说：“我想回到妈妈身边。”于是，萤火虫们排成一条闪亮的路，列车穿过竹林，绕过石桥，终于来到那片圆圆的荷叶。露珠妈妈正焦急地等待，看到孩子便开心地抱住它。为了感谢大家，她把清晨最亮的一点光送给晚班车。天边微微发白，萤火虫们关掉车灯，钻进柔软的叶子下面休息。荷塘恢复安静，只剩一声轻轻的：“晚安，明天见。”'
   }
 };
@@ -67,6 +73,7 @@ const state = {
   voiceProfile: 'faithful',
   selectedPreset: 'goodnight',
   selectedStory: '',
+  previewingStoryId: '',
   generatedUrls: new Set(),
   isGenerating: false,
   toastTimer: null
@@ -103,7 +110,8 @@ function cacheElements() {
     'recording-meta', 'recording-preview', 'preview-audio', 'upload-button',
     'clone-status', 'step-message', 'voice-ready', 'voice-ready-text',
     'reset-voice-button', 'voice-profile-row', 'voice-profile-help',
-    'preset-row', 'story-shelf', 'message-input', 'char-count',
+    'preset-row', 'story-shelf', 'free-preview-title', 'free-preview-status',
+    'preview-story-button', 'use-story-button', 'message-input', 'char-count',
     'generate-note', 'generate-button', 'step-results', 'generation-status',
     'results-grid', 'toast'
   ];
@@ -133,12 +141,18 @@ function bindEvents() {
     if (button) selectStory(button.dataset.story);
   });
 
+  elements.previewStoryButton.addEventListener('click', toggleStoryPreview);
+  elements.useStoryButton.addEventListener('click', useSelectedStory);
+
   elements.voiceProfileRow.addEventListener('click', event => {
     const button = event.target.closest('[data-voice-profile]');
     if (button) selectVoiceProfile(button.dataset.voiceProfile);
   });
 
-  window.addEventListener('pagehide', stopMediaTracks);
+  window.addEventListener('pagehide', () => {
+    stopMediaTracks();
+    stopStoryPreview();
+  });
 }
 
 function toCamelCase(value) {
@@ -450,7 +464,7 @@ function resetVoice() {
   clearRecording();
   clearGeneratedResults();
   elements.voiceReady.hidden = true;
-  elements.stepMessage.dataset.state = 'locked';
+  elements.stepMessage.dataset.state = 'active';
   elements.stepResults.dataset.state = 'locked';
   elements.voiceConsent.checked = false;
   updateProgress(1);
@@ -462,10 +476,12 @@ function selectPreset(presetId) {
   if (!preset) return;
   state.selectedPreset = presetId;
   state.selectedStory = '';
+  stopStoryPreview();
   elements.presetRow.querySelectorAll('[data-preset]').forEach(button => {
     button.classList.toggle('is-selected', button.dataset.preset === presetId);
   });
   updateStorySelection();
+  updateStoryPreviewControls();
   elements.messageInput.value = preset.zh;
   updateCharCount();
 }
@@ -473,13 +489,14 @@ function selectPreset(presetId) {
 function selectStory(storyId) {
   const story = STORIES[storyId];
   if (!story) return;
+  if (state.previewingStoryId && state.previewingStoryId !== storyId) stopStoryPreview();
   state.selectedStory = storyId;
   state.selectedPreset = '';
   elements.presetRow.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('is-selected'));
   updateStorySelection();
   elements.messageInput.value = story.zh;
   updateCharCount();
-  elements.messageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  updateStoryPreviewControls();
 }
 
 function updateStorySelection() {
@@ -492,13 +509,92 @@ function updateStorySelection() {
   });
 }
 
+function updateStoryPreviewControls() {
+  const story = STORIES[state.selectedStory];
+  const hasStory = Boolean(story);
+  elements.previewStoryButton.disabled = !hasStory;
+  elements.useStoryButton.disabled = !hasStory;
+
+  if (!story) {
+    elements.freePreviewTitle.textContent = '先选择一个故事';
+    elements.freePreviewStatus.textContent = '可用手机系统声音免费试听，不需要先录音。';
+    elements.previewStoryButton.textContent = '▶ 免费试听';
+    return;
+  }
+
+  elements.freePreviewTitle.textContent = `已选《${story.title}》`;
+  elements.freePreviewStatus.textContent = state.previewingStoryId === state.selectedStory
+    ? '正在用手机系统声音播放，点击可停止。'
+    : '系统音色试听不消耗 ElevenLabs 额度。';
+  elements.previewStoryButton.textContent = state.previewingStoryId === state.selectedStory
+    ? '■ 停止试听'
+    : '▶ 免费试听';
+}
+
+function toggleStoryPreview() {
+  const story = STORIES[state.selectedStory];
+  if (!story) return;
+
+  if (state.previewingStoryId === state.selectedStory) {
+    stopStoryPreview();
+    return;
+  }
+  if (!('speechSynthesis' in window)) {
+    showToast('当前浏览器没有系统朗读功能。');
+    return;
+  }
+
+  stopStoryPreview();
+  const utterance = new SpeechSynthesisUtterance(story.zh);
+  utterance.lang = 'zh-CN';
+  utterance.rate = 0.84;
+  utterance.pitch = 1;
+  const voice = window.speechSynthesis.getVoices().find(item => item.lang.toLowerCase().startsWith('zh'));
+  if (voice) utterance.voice = voice;
+
+  state.previewingStoryId = state.selectedStory;
+  utterance.onend = finishStoryPreview;
+  utterance.onerror = finishStoryPreview;
+  updateStoryPreviewControls();
+  window.speechSynthesis.speak(utterance);
+}
+
+function finishStoryPreview() {
+  state.previewingStoryId = '';
+  updateStoryPreviewControls();
+}
+
+function stopStoryPreview() {
+  window.speechSynthesis?.cancel();
+  if (!state.previewingStoryId) return;
+  state.previewingStoryId = '';
+  updateStoryPreviewControls();
+}
+
+function useSelectedStory() {
+  const story = STORIES[state.selectedStory];
+  if (!story) return;
+  stopStoryPreview();
+  elements.messageInput.value = story.zh;
+  updateCharCount();
+
+  if (!state.voiceId) {
+    showToast('故事已经选好。先录入爸爸声音，再回来生成。');
+    scrollToElement(document.getElementById('step-record'));
+    return;
+  }
+  scrollToElement(elements.messageInput);
+}
+
 function handleMessageInput() {
   const selectedText = PRESETS[state.selectedPreset]?.zh || STORIES[state.selectedStory]?.zh || '';
   if (!selectedText || elements.messageInput.value !== selectedText) {
     state.selectedPreset = '';
     state.selectedStory = '';
+    stopStoryPreview();
     elements.presetRow.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('is-selected'));
     updateStorySelection();
+    updateStoryPreviewControls();
   }
   updateCharCount();
 }
@@ -755,7 +851,7 @@ function pauseOtherAudio(activeAudio) {
   document.querySelectorAll('audio').forEach(audio => {
     if (audio !== activeAudio && !audio.paused) audio.pause();
   });
-  window.speechSynthesis?.cancel();
+  stopStoryPreview();
 }
 
 function speakText(text, language) {
@@ -785,7 +881,7 @@ function downloadAudio(audioData, language) {
 }
 
 function clearGeneratedResults() {
-  window.speechSynthesis?.cancel();
+  stopStoryPreview();
   state.generatedUrls.forEach(url => URL.revokeObjectURL(url));
   state.generatedUrls.clear();
   elements.resultsGrid.replaceChildren();

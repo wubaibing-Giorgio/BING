@@ -263,6 +263,55 @@
     .preset { border: 1px solid var(--line); background: white; color: #6b5b52; padding: 9px 12px; border-radius: 999px; white-space: nowrap; font-size: 12px; font-weight: 700; cursor: pointer; }
     .preset.is-selected { background: #efe4da; border-color: #c9afa0; color: var(--cocoa-dark); }
 
+    .story-library-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 18px 1px 10px;
+    }
+    .story-library-title { margin: 0; font-size: 15px; letter-spacing: -.2px; }
+    .story-library-subtitle { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .free-pill { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; color: #567059; background: var(--sage-soft); font-size: 11px; font-weight: 800; }
+
+    .story-shelf {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(226px, 82%);
+      gap: 10px;
+      overflow-x: auto;
+      padding: 2px 2px 9px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      overscroll-behavior-inline: contain;
+    }
+    .story-shelf::-webkit-scrollbar { display: none; }
+    .story-card {
+      appearance: none;
+      width: 100%;
+      min-height: 146px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      padding: 14px;
+      color: var(--ink);
+      background: linear-gradient(145deg, #fffefa, #f7f0e8);
+      text-align: left;
+      cursor: pointer;
+      scroll-snap-align: start;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .15s ease;
+    }
+    .story-card:active { transform: scale(.985); }
+    .story-card:focus-visible { outline: 3px solid rgba(127,95,82,.22); outline-offset: 2px; }
+    .story-card.is-selected { border-color: #9a7667; box-shadow: 0 9px 24px rgba(104,73,59,.12), inset 0 0 0 1px rgba(154,118,103,.16); }
+    .story-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .story-place { color: var(--cocoa); font-size: 11px; font-weight: 800; }
+    .story-time { color: #96877f; font-size: 10px; }
+    .story-title { display: block; margin-top: 11px; font-family: Georgia, "Songti SC", serif; font-size: 17px; line-height: 1.25; }
+    .story-summary { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .story-action { display: block; margin-top: 11px; color: var(--cocoa-dark); font-size: 11px; font-weight: 800; }
+    .story-card.is-selected .story-action::before { content: "✓ "; color: var(--sage); }
+    .story-note { margin: 1px 1px 12px; color: #897b73; font-size: 10px; line-height: 1.55; }
+
     .textarea-wrap { position: relative; margin-top: 8px; }
     textarea { width: 100%; min-height: 145px; resize: vertical; padding: 15px 15px 36px; border: 1px solid #dfd2c8; border-radius: 18px; background: #fffefa; color: var(--ink); line-height: 1.7; font-size: 15px; outline: none; }
     textarea:focus { border-color: #a58475; box-shadow: 0 0 0 4px rgba(133,98,82,.08); }
@@ -425,12 +474,59 @@
         </div>
         <p id="voice-profile-help" class="generate-note">优先贴近爸爸本人声纹；建议首次生成先选这一档。</p>
 
-        <p class="helper">可以选一段现成文案，也可以直接写自己的内容。正式模式支持任意中文文案。</p>
+        <p class="helper">可以选一段简短文案、环球睡前故事，也可以直接写自己的内容。正式模式支持任意中文文案。</p>
         <div id="preset-row" class="preset-row" aria-label="胎教文案模板">
           <button class="preset is-selected" type="button" data-preset="goodnight">晚安陪伴</button>
           <button class="preset" type="button" data-preset="blessing">平安祝福</button>
           <button class="preset" type="button" data-preset="story">第一次见面</button>
         </div>
+
+        <div class="story-library-head">
+          <div>
+            <h4 class="story-library-title">环球睡前故事</h4>
+            <p class="story-library-subtitle">左右滑动挑选，点击后会自动填入文案</p>
+          </div>
+          <span class="free-pill">6 篇免费</span>
+        </div>
+        <div id="story-shelf" class="story-shelf" aria-label="免费环球睡前故事">
+          <button class="story-card" type="button" data-story="moon-postman" aria-pressed="false">
+            <span class="story-card-top"><span class="story-place">🇩🇰 北欧</span><span class="story-time">约 2 分钟</span></span>
+            <strong class="story-title">小月亮的银色邮差</strong>
+            <span class="story-summary">雪兔替月亮把“晚安”送给世界上还没睡着的孩子。</span>
+            <span class="story-action">使用这个故事</span>
+          </button>
+          <button class="story-card" type="button" data-story="singing-boat" aria-pressed="false">
+            <span class="story-card-top"><span class="story-place">🇮🇹 意大利</span><span class="story-time">约 2 分钟</span></span>
+            <strong class="story-title">会唱歌的小船</strong>
+            <span class="story-summary">威尼斯的小船终于发现，自己最美的歌声藏在水波里。</span>
+            <span class="story-action">使用这个故事</span>
+          </button>
+          <button class="story-card" type="button" data-story="cloud-bakery" aria-pressed="false">
+            <span class="story-card-top"><span class="story-place">🇫🇷 法国</span><span class="story-time">约 2 分钟</span></span>
+            <strong class="story-title">云朵面包店</strong>
+            <span class="story-summary">小狐狸烤出月牙面包，让疲倦的星星重新亮起来。</span>
+            <span class="story-action">使用这个故事</span>
+          </button>
+          <button class="story-card" type="button" data-story="lighthouse-hedgehog" aria-pressed="false">
+            <span class="story-card-top"><span class="story-place">🇬🇧 英国</span><span class="story-time">约 2 分钟</span></span>
+            <strong class="story-title">守灯的小刺猬</strong>
+            <span class="story-summary">海雾来临时，一盏温暖的小灯为大家照亮回家的路。</span>
+            <span class="story-action">使用这个故事</span>
+          </button>
+          <button class="story-card" type="button" data-story="little-elephant-rain" aria-pressed="false">
+            <span class="story-card-top"><span class="story-place">🇮🇳 印度</span><span class="story-time">约 2 分钟</span></span>
+            <strong class="story-title">小象和第一滴雨</strong>
+            <span class="story-summary">小象把第一滴雨送给花园，也收到了整个夏天的感谢。</span>
+            <span class="story-action">使用这个故事</span>
+          </button>
+          <button class="story-card" type="button" data-story="firefly-train" aria-pressed="false">
+            <span class="story-card-top"><span class="story-place">🇯🇵 日本</span><span class="story-time">约 2 分钟</span></span>
+            <strong class="story-title">萤火虫晚班车</strong>
+            <span class="story-summary">一列发着微光的小火车，送迷路的露珠回到荷叶家。</span>
+            <span class="story-action">使用这个故事</span>
+          </button>
+        </div>
+        <p class="story-note">故事为 PapaVoice 原创内容，可免费选用；生成音频会使用你现有的语音服务额度。</p>
         <div class="textarea-wrap">
           <textarea id="message-input" maxlength="500" placeholder="亲爱的宝宝，爸爸想对你说……"></textarea>
           <span class="char-count"><span id="char-count">0</span>/500</span>
@@ -458,6 +554,6 @@
   </div>
 
   <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
-  <script src="./app.js?v=2.2.0" defer></script>
+  <script src="./app.js?v=2.3.0" defer></script>
 </body>
 </html>

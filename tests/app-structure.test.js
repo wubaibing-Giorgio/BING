@@ -23,7 +23,7 @@ test('page loads one application script and no conflicting legacy scripts', asyn
   const html = await readFile(new URL('papavoice/index.html', root), 'utf8');
   const sources = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(match => match[1]);
 
-  assert.deepEqual(sources, ['./app.js?v=2.2.0']);
+  assert.deepEqual(sources, ['./app.js?v=2.3.0']);
   assert.doesNotMatch(html, /ai-voice-handler\.js|\.\/script\.js/);
 });
 
@@ -48,6 +48,26 @@ test('voice identity workflow requires a full quality recording', async () => {
   assert.match(html, /建议 90–120 秒/);
   assert.match(html, /没有回声/);
   assert.match(html, /data-voice-profile="faithful"/);
+});
+
+test('page includes a free international bedtime story shelf', async () => {
+  const [html, script] = await Promise.all([
+    readFile(new URL('papavoice/index.html', root), 'utf8'),
+    readFile(new URL('papavoice/app.js', root), 'utf8')
+  ]);
+
+  const storyButtons = [...html.matchAll(/data-story="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(storyButtons.length, 6);
+  assert.equal(new Set(storyButtons).size, 6);
+  assert.match(html, /环球睡前故事/);
+  assert.match(html, /6 篇免费/);
+  assert.match(html, /生成音频会使用你现有的语音服务额度/);
+
+  for (const storyId of storyButtons) {
+    assert.match(script, new RegExp(`'${storyId}'`));
+  }
+  assert.match(script, /function selectStory/);
+  assert.match(script, /selectedStory/);
 });
 
 test('root redirect remains relative for both Vercel and GitHub Pages', async () => {

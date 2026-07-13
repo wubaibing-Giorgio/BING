@@ -9,10 +9,7 @@
     "test": "node --test",
     "dev": "vercel dev"
   },
-  "dependencies": {
-    "form-data": "^4.0.4",
-    "node-fetch": "^3.3.2"
-  },
+  "dependencies": {},
   "engines": {
     "node": ">=18"
   }

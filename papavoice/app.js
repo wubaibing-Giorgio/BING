@@ -51,11 +51,12 @@ const state = {
 const elements = {};
 
 class ApiError extends Error {
-  constructor(message, status, fallback = false) {
+  constructor(message, status, fallback = false, requestId = '') {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.fallback = fallback;
+    this.requestId = requestId;
   }
 }
 
@@ -120,21 +121,26 @@ async function checkServiceStatus() {
     clearTimeout(timeoutId);
 
     const data = await response.json();
-    setServiceMode(response.ok && data.configured ? 'ai' : 'demo');
+    setServiceMode(
+      response.ok && data.configured ? 'ai' : 'demo',
+      data.providerReachable !== false
+    );
   } catch {
     setServiceMode('demo');
   }
 }
 
-function setServiceMode(mode) {
+function setServiceMode(mode, providerReachable = true) {
   state.mode = mode;
   elements.servicePill.dataset.mode = mode;
   elements.modeBanner.dataset.mode = mode;
 
   if (mode === 'ai') {
-    elements.servicePillText.textContent = '真实音色';
-    elements.modeBanner.querySelector('.mode-icon').textContent = '✓';
-    elements.modeBannerText.textContent = '真实爸爸音色服务已连接。录音只会在你确认并点击“建立爸爸专属音色”后上传。';
+    elements.servicePillText.textContent = providerReachable ? '真实音色' : '音色待连接';
+    elements.modeBanner.querySelector('.mode-icon').textContent = providerReachable ? '✓' : '!';
+    elements.modeBannerText.textContent = providerReachable
+      ? '真实爸爸音色服务已连接。录音只会在你确认并点击“建立爸爸专属音色”后上传。'
+      : '爸爸音色密钥已配置，但语音服务连接暂时不稳定；可以继续尝试，失败时会保留录音。';
   } else {
     elements.servicePillText.textContent = '体验模式';
     elements.modeBanner.querySelector('.mode-icon').textContent = 'i';
@@ -273,9 +279,10 @@ function finalizeRecording() {
   elements.recordingPreview.hidden = false;
 
   const enough = state.recordingDuration >= MIN_RECORD_SECONDS;
+  const fileSize = formatFileSize(state.recordingBlob.size);
   elements.recordingMeta.className = `recording-meta status ${enough ? 'is-success' : 'is-error'}`;
   elements.recordingMeta.textContent = enough
-    ? `✓ 已录制 ${Math.round(state.recordingDuration)} 秒，请先试听，确认清楚后建立音色。`
+    ? `✓ 已录制 ${Math.round(state.recordingDuration)} 秒 · ${fileSize}，请先试听，确认清楚后建立音色。`
     : `只录了 ${Math.round(state.recordingDuration)} 秒，还差 ${Math.ceil(MIN_RECORD_SECONDS - state.recordingDuration)} 秒，请重新录制。`;
   elements.uploadButton.disabled = !enough;
   updateUploadButton();
@@ -339,16 +346,7 @@ async function createVoiceClone() {
   elements.cloneStatus.textContent = '正在安全上传录音并建立音色，通常需要十几秒。';
 
   try {
-    const audioData = await blobToDataUrl(state.recordingBlob);
-    const data = await requestJson(`${API_BASE}/create-voice`, {
-      method: 'POST',
-      body: JSON.stringify({
-        audioData,
-        mimeType: state.recordingMimeType,
-        duration: state.recordingDuration,
-        voiceName: `PapaVoice Dad ${new Date().toISOString().slice(0, 10)}`
-      })
-    });
+    const data = await uploadVoiceRecording();
 
     state.voiceId = data.voiceId;
     try { localStorage.setItem('papavoice.voiceId', state.voiceId); } catch { /* session-only */ }
@@ -359,9 +357,10 @@ async function createVoiceClone() {
     scrollToElement(elements.stepMessage);
   } catch (error) {
     if (error.fallback) setServiceMode('demo');
+    const message = formatApiError(error);
     elements.cloneStatus.className = 'status is-error';
-    elements.cloneStatus.textContent = error.message;
-    showToast(error.message);
+    elements.cloneStatus.textContent = message;
+    showToast(message);
   } finally {
     setButtonLoading(elements.uploadButton, false);
     updateUploadButton();
@@ -681,18 +680,73 @@ async function requestJson(url, options = {}) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new ApiError(data.message || data.error || `请求失败（${response.status}）`, response.status, Boolean(data.fallback));
+    throw new ApiError(
+      data.message || data.error || `请求失败（${response.status}）`,
+      response.status,
+      Boolean(data.fallback),
+      data.requestId || response.headers.get('X-PapaVoice-Request-Id') || ''
+    );
   }
   return data;
 }
 
-function blobToDataUrl(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('读取录音失败，请重新录制。'));
-    reader.readAsDataURL(blob);
-  });
+async function uploadVoiceRecording() {
+  const requestId = createClientRequestId();
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 65_000);
+  const mimeType = state.recordingMimeType || state.recordingBlob.type || 'application/octet-stream';
+
+  try {
+    const response = await fetch(`${API_BASE}/create-voice`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': mimeType,
+        'X-PapaVoice-Mime-Type': mimeType,
+        'X-PapaVoice-Duration': String(state.recordingDuration),
+        'X-PapaVoice-Request-Id': requestId,
+        'X-PapaVoice-Voice-Name': `PapaVoice Dad ${requestId.slice(0, 8)}`
+      },
+      body: state.recordingBlob,
+      signal: controller.signal
+    });
+    const data = await response.json().catch(() => ({}));
+    const responseRequestId = data.requestId || response.headers.get('X-PapaVoice-Request-Id') || requestId;
+
+    if (!response.ok) {
+      throw new ApiError(
+        data.message || data.error || `服务器返回错误（${response.status}）`,
+        response.status,
+        Boolean(data.fallback),
+        responseRequestId
+      );
+    }
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    const timedOut = error?.name === 'AbortError';
+    throw new ApiError(
+      timedOut
+        ? '建立音色等待超时，录音仍在，请保持页面打开后再点一次。'
+        : '上传连接中断，录音仍在，无需重录；请保持 Safari 在前台后再点一次。',
+      timedOut ? 504 : 0,
+      false,
+      requestId
+    );
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
+function createClientRequestId() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `pv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function formatApiError(error) {
+  const message = error?.message || '建立音色失败，请稍后重试。';
+  const suffix = error?.requestId ? `（编号 ${String(error.requestId).slice(-8)}）` : '';
+  return `${message}${suffix}`;
 }
 
 function setButtonLoading(button, loading, loadingText = '') {
@@ -718,6 +772,12 @@ function updateProgress(activeStep) {
 function formatDuration(seconds) {
   const total = Math.max(0, Math.floor(seconds));
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function scrollToElement(element) {

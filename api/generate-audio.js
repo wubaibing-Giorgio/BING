@@ -1,5 +1,4 @@
-import FormData from 'form-data';
-import fetch from 'node-fetch';
+import { Blob } from 'node:buffer';
 
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1';
 const SUPPORTED_LANGUAGES = new Set(['zh', 'en', 'it', 'fr']);
@@ -90,16 +89,12 @@ async function createChineseSpeech({ text, voiceId, apiKey }) {
     throw error;
   }
 
-  return response.buffer();
+  return Buffer.from(await response.arrayBuffer());
 }
 
 async function createDub({ sourceBuffer, targetLanguage, apiKey }) {
   const form = new FormData();
-  form.append('file', sourceBuffer, {
-    filename: 'papavoice-source.mp3',
-    contentType: 'audio/mpeg',
-    knownLength: sourceBuffer.length
-  });
+  form.append('file', new Blob([sourceBuffer], { type: 'audio/mpeg' }), 'papavoice-source.mp3');
   form.append('name', `PapaVoice ${targetLanguage} ${Date.now()}`);
   form.append('source_lang', 'zh');
   form.append('target_lang', targetLanguage);
@@ -109,10 +104,7 @@ async function createDub({ sourceBuffer, targetLanguage, apiKey }) {
 
   const response = await fetch(`${ELEVENLABS_API_URL}/dubbing`, {
     method: 'POST',
-    headers: {
-      'xi-api-key': apiKey,
-      ...form.getHeaders()
-    },
+    headers: { 'xi-api-key': apiKey },
     body: form
   });
 
@@ -171,7 +163,7 @@ async function fetchDubResult({ dubbingId, language, apiKey }) {
     throw error;
   }
 
-  const audioBuffer = await audioResponse.buffer();
+  const audioBuffer = Buffer.from(await audioResponse.arrayBuffer());
   let translatedText = '';
 
   if (transcriptResponse.ok) {
